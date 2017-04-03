@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+BASEDIR=`dirname $0`
+
+METEOR_FLAGS="-XX:+UseCompressedOops -Xmx2g"
+
+# Specify -Dfile.encoding so that the meteor paraphrase tables load properly
+java -Dfile.encoding=UTF8 $METEOR_FLAGS -cp $BASEDIR/lib/tercom-%TERCOM_VER%.jar:$BASEDIR/lib/meteor-%METEOR_VER%.jar:$BASEDIR/multeval-%MULTEVAL_VER%.jar multeval.MultEval "$@"

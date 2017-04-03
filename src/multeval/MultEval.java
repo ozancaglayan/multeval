@@ -70,22 +70,13 @@ public class MultEval {
 		return threads;
 	}
 
-        private static String loadVersion() throws IOException {
-            Properties props = new Properties();
-            FileInputStream in = new FileInputStream("constants");
-            props.load(in);
-            in.close();
-            String version = props.getProperty("version");
-            return version;
-        }
+	public static void main(String[] args) throws ConfigurationException, IOException, InterruptedException {
 
-	public static void main(String[] args) throws ConfigurationException, IOException,
-			InterruptedException {
+    String version = MultEval.class.getPackage().getImplementationVersion();
 
-            String version = loadVersion();
-            System.err.println(String.format("MultEval V%s\n", version) +
-                               "By Jonathan Clark\n" +
-                               "Using Libraries: METEOR (Michael Denkowski) and TER (Matthew Snover)\n");
+    System.err.println(String.format("MultEval V%s\n", version) +
+                       "By Jonathan Clark\n" +
+                       "Using Libraries: METEOR (Michael Denkowski) and TER (Matthew Snover)\n");
 
 		if (args.length == 0 || !MODULES.keySet().contains(args[0])) {
 			System.err.println("Usage: program <module_name> <module_options>");
