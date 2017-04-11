@@ -35,7 +35,6 @@ public class MultEval {
 		// 1) activate config options so that we fail-fast
 		List<Metric<?>> metrics = new ArrayList<Metric<?>>();
 		for (String metricName : metricNames) {
-			System.err.println("Loading metric: " + metricName);
 			Metric<?> metric = KNOWN_METRICS.get(metricName.toLowerCase());
 			if (metric == null) {
 				throw new RuntimeException("Unknown metric: " + metricName

@@ -78,6 +78,9 @@ public class MultEvalModule implements Module {
 	@Option(longName = "threads", usage = "How many threads should we use? Thread-unsafe metrics will be run in a separate thread. (Zero means all available cores)", required = false, defaultValue = "0")
 	private int threads;
 
+	@Option(longName = "descNames", usage = "Use hypothesis base file names instead of 'system <n>' in the final report", defaultValue = "false")
+	private boolean descNames;
+
 	// TODO: Lowercasing option
 
 	@Override
@@ -121,20 +124,29 @@ public class MultEvalModule implements Module {
 		for (int i = 0; i < metricNames.length; i++) {
 			metricNames[i] = metrics.get(i).toString();
 		}
+
+    // Final array to be filled
 		String[] sysNames = new String[data.getNumSystems()];
-		sysNames[0] = "baseline";
-		for (int i = 1; i < sysNames.length; i++) {
-			sysNames[i] = "system " + i;
-		}
-		ResultsManager results =
-				new ResultsManager(metricNames, sysNames, data.getNumOptRuns());
+		// File names as descriptive names
+		String[] sysDescNames = data.getDescriptiveSysNames().toArray(new String[0]);
+
+    sysNames[0] = "baseline";
+    if (descNames)
+      sysNames[0] = sysNames[0] + ": " + sysDescNames[0];
+    for (int i = 1; i < sysNames.length; i++) {
+      sysNames[i] = "system " + i;
+      if (descNames)
+        sysNames[i] = sysNames[i] + ": " + sysDescNames[i];
+    }
+
+		ResultsManager results = new ResultsManager(metricNames, sysNames, data.getNumOptRuns());
 
 		// 3) evaluate each system and report the average scores
 		runOverallEval(metrics, data, suffStats, results);
 		runOOVAnalysis(metrics, data, suffStats, results);
 
-                // output sentence-level scores, if requested
-                runSentScores(metrics, data, suffStats, results);
+    // output sentence-level scores, if requested
+    runSentScores(metrics, data, suffStats, results);
 
 		// run diff ranking, if requested (MUST be run after overall eval,
 		// which computes median systems)
@@ -325,8 +337,7 @@ public class MultEvalModule implements Module {
 			final int iMetricF = iMetric;
 			final Metric<?> metricMaster = metrics.get(iMetric);
 
-			System.err.println("Collecting sufficient statistics for metric: "
-					+ metricMaster.toString());
+			//System.err.println("Collecting sufficient statistics for metric: " + metricMaster.toString());
 			MetricWorkerPool<Triple<Integer, Integer, Integer>, Metric<?>> work =
 					new MetricWorkerPool<Triple<Integer, Integer, Integer>, Metric<?>>(
 							threads, new Supplier<Metric<?>>() {
@@ -360,8 +371,7 @@ public class MultEvalModule implements Module {
 			}
 			work.waitForCompletion();
 
-			System.err.println("Finished collecting sufficient statistics for metric: "
-					+ metricMaster.toString());
+			//System.err.println("Finished collecting sufficient statistics for metric: " + metricMaster.toString());
 		}
 
 		return suffStats;
@@ -380,7 +390,6 @@ public class MultEvalModule implements Module {
 					List<SuffStats<?>> statsBySent = suffStats.getStats(iMetric, iSys, iOpt);
 					SuffStats<?> corpusStats = SuffStatUtils.sumStats(statsBySent);
 					scoresByOptRun[iOpt] = metric.scoreStats(corpusStats);
-          System.err.println("RESULT: " + results.sysNames[iSys] + ": " + results.metricNames[iMetric] + ": OptRun " + iOpt + ": " + String.format("%.6f", scoresByOptRun[iOpt]));
 				}
 				double avg = MathUtils.average(scoresByOptRun);
 				double stddev = MathUtils.stddev(scoresByOptRun);
@@ -429,9 +438,9 @@ public class MultEvalModule implements Module {
 							CollectionUtils.sortByCount(unmatchedRefWords);
 
 					int nHead = 10;
-					System.err.println("Top unmatched hypothesis words accoring to METEOR: "
+					System.err.println("Top unmatched hypothesis words according to METEOR: "
 							+ CollectionUtils.head(unmatchedHypWordsSorted, nHead));
-					System.err.println("Top unmatched reference words accoring to METEOR: "
+					System.err.println("Top unmatched reference words according to METEOR: "
 							+ CollectionUtils.head(unmatchedRefWordsSorted, nHead));
 				}
 			}

@@ -19,6 +19,9 @@ public class HypothesisManager {
   // indices: iSys, oOpt, iHyp
   private List<List<List<String>>> allHyps = new ArrayList<List<List<String>>>();
 
+  // descriptive system names
+  private List<String> descSysNames = new ArrayList<String>();
+
   private int numHyps = -1;
   private int numRefs = -1;
   private int numOptRuns = -1;
@@ -41,7 +44,9 @@ public class HypothesisManager {
     // first, load system hypotheses
     numSystems = hypFilesBySys.length + 1; // include baseline
     allHyps.clear();
+    // Below call will set numOptRuns
     loadHyps(hypFilesBaseline, "baseline");
+
     for(int iSys = 0; iSys < hypFilesBySys.length; iSys++) {
       loadHyps(hypFilesBySys[iSys], "" + (iSys + 1));
     }
@@ -77,6 +82,7 @@ public class HypothesisManager {
   }
 
   private void loadHyps(String[] hypFiles, String sys) throws IOException {
+    // Called for each set of --hyps-sysN
     if (numOptRuns == -1) {
       numOptRuns = hypFiles.length;
     } else {
@@ -88,9 +94,14 @@ public class HypothesisManager {
 
     List<List<String>> sysHypsForAllOptRuns = new ArrayList<List<String>>();
     allHyps.add(sysHypsForAllOptRuns);
+
+    // Use first opt run for each set for descriptive name
+    File f = new File(hypFiles[0]);
+    descSysNames.add(f.getName());
+
+    // Traverse each optimizer run for this set
     for(int iOpt = 0; iOpt < numOptRuns; iOpt++) {
-      List<String> hypsForOptRun = loadSentences(hypFiles[iOpt], "Hypotheses for system " + sys + " opt run "
-          + (iOpt + 1));
+      List<String> hypsForOptRun = loadSentences(hypFiles[iOpt], "Hypotheses for system " + sys + " opt run " + (iOpt + 1));
       sysHypsForAllOptRuns.add(hypsForOptRun);
 
       if (numHyps == -1) {
@@ -107,17 +118,11 @@ public class HypothesisManager {
   public static List<String> loadSentences(String hypFile, String forWhat) throws IOException {
 
     File file = new File(hypFile);
-    // TODO: Say what system (or reference) this is for
-    System.err.println("Reading " + forWhat + " file " + file.getAbsolutePath());
+    System.err.println("Reading " + forWhat + " : " + file.getName());
     List<String> sentences = Files.readLines(file, Charsets.UTF_8);
-    // normalize any "double" whitespace, if it exists
     for(int i = 0; i < sentences.size(); i++) {
       String sent = sentences.get(i);
       sent = StringUtils.normalizeWhitespace(sent);
-      // if(StringUtils.hasRedundantWhitespace(sent)) {
-      // System.err.println("Normalizing extraneous whitespace: ");
-      //
-      // }
       sentences.set(i, sent);
     }
 
@@ -140,6 +145,10 @@ public class HypothesisManager {
   public List<String> getReferences(int iHyp) {
     // TODO: More informative error messages w/ bounds checking
     return allRefs.get(iHyp);
+  }
+
+  public List<String> getDescriptiveSysNames() {
+    return descSysNames;
   }
 
   public List<List<String>> getAllReferences() {

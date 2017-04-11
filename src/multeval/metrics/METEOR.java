@@ -134,12 +134,7 @@ public class METEOR extends Metric<METEORStats> {
       config.setNormalization(Constants.NORMALIZE_NO_PUNCT);
     }
 
-    System.err.println("Loading METEOR paraphrase table...");
-    Stopwatch watch = new Stopwatch();
-    watch.start();
     scorer = new MeteorScorer(config);
-    watch.stop();
-    System.err.println("Loaded METEOR in " + watch.toString(3));
   }
 
   @Override

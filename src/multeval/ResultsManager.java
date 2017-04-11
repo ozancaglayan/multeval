@@ -36,9 +36,6 @@ public class ResultsManager {
     }
     Map<Type, Double> map = resultsByMetric.get(iMetric);
     map.put(type, d);
-
-    System.err.println("RESULT: " + sysNames[iSys] + ": " + metricNames[iMetric] + ": " + type.name() + ": "
-        + String.format("%.6f", d)); // too much precision here, but AsciiTable fixes this
   }
 
   public Double get(int iMetric, int iSys, Type type) {
