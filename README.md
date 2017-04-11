@@ -10,15 +10,23 @@ Jonathan Clark, Chris Dyer, Alon Lavie, and Noah Smith, "Better Hypothesis Testi
 
 To keep updated on new versions of this software, subscribe to our low-traffic announcement mailing list: http://groups.google.com/group/multeval-announce. All active users are encourated to subscribe.
 
+Libraries
+=========
+
+MultEval uses the following libraries:
+
+*  METEOR 1.5 (LGPL License, https://github.com/cmu-mtlab/meteor -- WordNet database has a compatible free license)
+*  Translation Error Rate 0.8 (LGPL License, TerCom, https://github.com/jhclark/tercom -- Thanks to Matt Snover for relicensing this). MultEval uses a slightly modified version of TER; the only change is that all classes have been moved from the default package into a "ter" package to overcome the Java restriction that classes in the defalut package cannot be imported across JARs.
+*  Google Guava (Apache License)
+*  Java Annotation Options (jannopts, LGPL License)
+
+Adding Your Own Metric
+======================
+
+Implement the metrics.Metric interface and then add it as an option in multeval.MultEval.
+
 Usage
 =====
-
-First, download and unpack the program:
-
-``` bash
-wget http://www.cs.cmu.edu/~jhclark/downloads/multeval-0.5.1.tgz
-tar -xvzf multeval-0.5.1.tgz
-```
 
 To evaluate a single system from the example data and get its BLEU, METEOR, and TER scores along with its standard deviation use:
 
@@ -224,22 +232,6 @@ Moses multi-bleu.pl calculates BLEU in a slightly different way than MultEval:
 MultEval uses the "smoothed" variant of BLEU in which orders with zero matching
 n-grams but non-zero possible matches get smoothed as per a formula in Papineni's bleu-1.04.pl.
 
-
-Adding Your Own Metric
-======================
-
-Implement the metrics.Metric interface and then add it as an option in multeval.MultEval.
-
-
-Libraries
-=========
-
-MultEval uses the following libraries:
-
-*  METEOR 1.5 (LGPL License, http://www.cs.cmu.edu/~alavie/METEOR/ -- WordNet database has a compatible free license)
-*  Translation Error Rate 0.7 (LGPL License, TerCom, http://www.cs.umd.edu/~snover/tercom/ -- Thanks to Matt Snover for relicensing this). MultEval uses a slightly modified version of TER; the only change is that all classes have been moved from the default package into a "ter" package to overcome the Java restriction that classes in the defalut package cannot be imported across JARs.
-*  Google Guava (Apache License)
-*  Java Annotation Options (jannopts, LGPL License)
 
 Building
 ========
