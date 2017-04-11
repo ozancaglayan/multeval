@@ -38,9 +38,6 @@ import com.google.common.collect.Multiset.Entry;
 
 public class MultEvalModule implements Module {
 
-	@Option(shortName = "v", longName = "verbosity", usage = "Verbosity level (Integer: 0-1)", defaultValue = "0")
-	public int verbosity;
-
 	@Option(shortName = "o", longName = "metrics", usage = "Space-delimited list of metrics to use. Any of: bleu, meteor, ter, length", defaultValue = "bleu meteor ter length", arrayDelim = " ")
 	public String[] metricNames;
 
@@ -383,10 +380,7 @@ public class MultEvalModule implements Module {
 					List<SuffStats<?>> statsBySent = suffStats.getStats(iMetric, iSys, iOpt);
 					SuffStats<?> corpusStats = SuffStatUtils.sumStats(statsBySent);
 					scoresByOptRun[iOpt] = metric.scoreStats(corpusStats);
-                                        if (verbosity >= 1) {
-                                            // TODO: Logging framework rather than verbosity level
-                                            System.err.println("RESULT: " + results.sysNames[iSys] + ": " + results.metricNames[iMetric] + ": OptRun " + iOpt + ": " + String.format("%.6f", scoresByOptRun[iOpt]));
-                                        }
+          System.err.println("RESULT: " + results.sysNames[iSys] + ": " + results.metricNames[iMetric] + ": OptRun " + iOpt + ": " + String.format("%.6f", scoresByOptRun[iOpt]));
 				}
 				double avg = MathUtils.average(scoresByOptRun);
 				double stddev = MathUtils.stddev(scoresByOptRun);
