@@ -35,7 +35,7 @@
     </jar>
 
     <!-- Create the runner -->
-    <copy file="src/multeval.sh.template" tofile="multeval" />
+    <copy file="src/multeval.sh.template" tofile="multeval" overwrite="true" />
     <replace file="multeval">
       <replacefilter token="%TERCOM_VER%" value="${tercom_ver}" />
       <replacefilter token="%METEOR_VER%" value="${meteor_ver}" />
