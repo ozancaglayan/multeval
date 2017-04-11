@@ -2,7 +2,7 @@
 <project name="multeval" default="jar" basedir=".">
   <property name="tercom_ver" value="0.8.0" />
   <property name="meteor_ver" value="1.5" />
-  <property name="multeval_ver" value="0.5.1" />
+  <property name="multeval_ver" value="0.5.2" />
 
   <!-- Compile the Java code -->
   <target name="compile">
@@ -24,7 +24,7 @@
   
   <!-- Create a JAR file of the compiled classes -->
   <target name="jar" depends="compile">
-    <jar destfile="multeval-0.5.1.jar">
+    <jar destfile="multeval-${multeval_ver}.jar">
 
       <fileset dir="bin" includes="**/*.class" />
       <zipfileset src="lib/jannopts.jar" excludes="META-INF/*" />
