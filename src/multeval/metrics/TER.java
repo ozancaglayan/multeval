@@ -11,28 +11,28 @@ import com.google.common.base.*;
 
 public class TER extends Metric<IntStats> {
 
-  @Option(shortName = "P", longName = "ter.punctuation", usage = "Ignore punctuation in TER?", defaultValue = "false")
+  @Option(longName = "ter.punctuation", usage = "Ignore punctuation in TER", defaultValue = "false")
   boolean punctuation;
 
-  @Option(shortName = "b", longName = "ter.beamWidth", usage = "Beam width for TER", defaultValue = "20")
+  @Option(longName = "ter.beamWidth", usage = "Beam width for TER", defaultValue = "20")
   int beamWidth;
 
-  @Option(shortName = "d", longName = "ter.maxShiftDistance", usage = "Maximum shift distance for TER", defaultValue = "50")
+  @Option(longName = "ter.maxShiftDistance", usage = "Maximum shift distance for TER", defaultValue = "50")
   int maxShiftDistance;
 
-  @Option(shortName = "M", longName = "ter.matchCost", usage = "Match cost for TER", defaultValue = "0.0")
+  @Option(longName = "ter.matchCost", usage = "Match cost for TER", defaultValue = "0.0")
   float matchCost;
 
-  @Option(shortName = "D", longName = "ter.deleteCost", usage = "Delete cost for TER", defaultValue = "1.0")
+  @Option(longName = "ter.deleteCost", usage = "Delete cost for TER", defaultValue = "1.0")
   float deleteCost;
 
-  @Option(shortName = "B", longName = "ter.substituteCost", usage = "Substitute cost for TER", defaultValue = "1.0")
+  @Option(longName = "ter.substituteCost", usage = "Substitute cost for TER", defaultValue = "1.0")
   float substituteCost;
 
-  @Option(shortName = "I", longName = "ter.insertCost", usage = "Insert cost for TER", defaultValue = "1.0")
+  @Option(longName = "ter.insertCost", usage = "Insert cost for TER", defaultValue = "1.0")
   float insertCost;
 
-  @Option(shortName = "T", longName = "ter.shiftCost", usage = "Shift cost for TER", defaultValue = "1.0")
+  @Option(longName = "ter.shiftCost", usage = "Shift cost for TER", defaultValue = "1.0")
   float shiftCost;
 
   private TERcost costfunc;

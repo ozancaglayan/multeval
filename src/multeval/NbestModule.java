@@ -32,22 +32,22 @@ import com.google.common.collect.ImmutableList;
 
 public class NbestModule implements Module {
 
-	@Option(shortName = "v", longName = "verbosity", usage = "Verbosity level", defaultValue = "0")
+	@Option(longName = "verbosity", usage = "Verbosity level", defaultValue = "0")
 	public int verbosity;
 
-	@Option(shortName = "o", longName = "metrics", usage = "Space-delimited list of metrics to use. Any of: bleu, meteor, ter, length", defaultValue = "bleu meteor ter", arrayDelim = " ")
+	@Option(longName = "metrics", usage = "Space-delimited list of metrics to use. Any of: bleu, meteor, ter, length", defaultValue = "bleu meteor ter", arrayDelim = " ")
 	public String[] metricNames;
 
-	@Option(shortName = "N", longName = "nbest", usage = "File containing tokenized, fullform hypotheses, one per line")
+	@Option(longName = "nbest", usage = "File containing tokenized, fullform hypotheses, one per line")
 	public String nbestList;
 
-	@Option(shortName = "R", longName = "refs", usage = "Space-delimited list of files containing tokenized, fullform references, one per line", arrayDelim = " ")
+	@Option(longName = "refs", usage = "Space-delimited list of files containing tokenized, fullform references, one per line", arrayDelim = " ")
 	public String[] refFiles;
 
-	@Option(shortName = "r", longName = "rankDir", usage = "Rank hypotheses of median optimization run of each system with regard to improvement/decline over median baseline system and output to the specified directory for analysis", required = false)
+	@Option(longName = "rankDir", usage = "Rank hypotheses of median optimization run of each system with regard to improvement/decline over median baseline system and output to the specified directory for analysis", required = false)
 	private String rankDir;
 
-	@Option(shortName = "t", longName = "threads", usage = "Number of threads to use. This will be reset to 1 thread if you choose to use any thread-unsafe metrics such as TER (Zero means use all available cores)", defaultValue = "0")
+	@Option(longName = "threads", usage = "Number of threads to use. This will be reset to 1 thread if you choose to use any thread-unsafe metrics such as TER (Zero means use all available cores)", defaultValue = "0")
 	private int threads;
 
 	@Override

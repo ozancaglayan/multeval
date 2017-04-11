@@ -17,32 +17,32 @@ import edu.cmu.meteor.aligner.*;
 
 public class METEOR extends Metric<METEORStats> {
 
-  @Option(shortName = "l", longName = "meteor.language", usage = "Two-letter language code of a supported METEOR language (e.g. 'en')")
+  @Option(longName = "meteor.language", usage = "Two-letter language code of a supported METEOR language (e.g. 'en')")
   String language;
 
-  @Option(shortName = "t", longName = "meteor.task", usage = "One of: rank adq hter tune (Rank is generally a good choice)", defaultValue = "rank")
+  @Option(longName = "meteor.task", usage = "One of: rank adq hter tune (Rank is generally a good choice)", defaultValue = "rank")
   String task;
 
-  @Option(shortName = "p", longName = "meteor.params", usage = "Custom parameters of the form 'alpha beta gamma' (overrides default)", arrayDelim = " ", required = false)
+  @Option(longName = "meteor.params", usage = "Custom parameters of the form 'alpha beta gamma' (overrides default)", arrayDelim = " ", required = false)
   double[] params;
 
-  @Option(shortName = "m", longName = "meteor.modules", usage = "Specify modules. (overrides default) Any of: exact stem synonym paraphrase", arrayDelim = " ", required = false)
+  @Option(longName = "meteor.modules", usage = "Specify modules. (overrides default) Any of: exact stem synonym paraphrase", arrayDelim = " ", required = false)
   String[] modules;
 
-  @Option(shortName = "w", longName = "meteor.weights", usage = "Specify module weights (overrides default)", arrayDelim = " ", required = false)
+  @Option(longName = "meteor.weights", usage = "Specify module weights (overrides default)", arrayDelim = " ", required = false)
   double[] moduleWeights;
 
-  @Option(shortName = "x", longName = "meteor.beamSize", usage = "Specify beam size (overrides default)", defaultValue = ""
+  @Option(longName = "meteor.beamSize", usage = "Specify beam size (overrides default)", defaultValue = ""
       + Constants.DEFAULT_BEAM_SIZE)
   int beamSize;
 
-  @Option(shortName = "s", longName = "meteor.synonymDirectory", usage = "If default is not desired (NOTE: This option has a different short flag than stand-alone METEOR)", required = false)
+  @Option(longName = "meteor.synonymDirectory", usage = "If default is not desired (NOTE: This option has a different short flag than stand-alone METEOR)", required = false)
   String synonymDirectory;
 
-  @Option(shortName = "a", longName = "meteor.paraphraseFile", usage = "If default is not desired", required = false)
+  @Option(longName = "meteor.paraphraseFile", usage = "If default is not desired", required = false)
   String paraphraseFile;
 
-  @Option(shortName = "k", longName = "meteor.keepPunctuation", usage = "Consider punctuation when aligning sentences (if false, the meteor tokenizer will be run, after which punctuation will be removed)", defaultValue = "true")
+  @Option(longName = "meteor.keepPunctuation", usage = "Consider punctuation when aligning sentences (if false, the meteor tokenizer will be run, after which punctuation will be removed)", defaultValue = "true")
   boolean keepPunctuation;
 
   public static final String[] SUBMETRIC_NAMES = { "prec", "rec", "frag" };

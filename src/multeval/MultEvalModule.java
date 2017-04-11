@@ -38,44 +38,44 @@ import com.google.common.collect.Multiset.Entry;
 
 public class MultEvalModule implements Module {
 
-	@Option(shortName = "o", longName = "metrics", usage = "Space-delimited list of metrics to use. Any of: bleu, meteor, ter, length", defaultValue = "bleu meteor ter length", arrayDelim = " ")
+	@Option(longName = "metrics", usage = "Space-delimited list of metrics to use. Any of: bleu, meteor, ter, length", defaultValue = "bleu meteor ter length", arrayDelim = " ")
 	public String[] metricNames;
 
-	@Option(shortName = "B", longName = "hyps-baseline", usage = "Space-delimited list of files containing tokenized, fullform hypotheses, one per line", arrayDelim = " ")
+	@Option(longName = "hyps-baseline", usage = "Space-delimited list of files containing tokenized, fullform hypotheses, one per line", arrayDelim = " ")
 	public String[] hypFilesBaseline;
 
 	// each element of the array is a system that the user designated with a
 	// number. each string element contains a space-delimited list of
 	// hypothesis files with each file containing hypotheses from one
 	// optimizer run
-	@Option(shortName = "H", longName = "hyps-sys", usage = "Space-delimited list of files containing tokenized, fullform hypotheses, one per line", arrayDelim = " ", numberable = true)
+	@Option(longName = "hyps-sys", usage = "Space-delimited list of files containing tokenized, fullform hypotheses, one per line", arrayDelim = " ", numberable = true)
 	public String[] hypFilesBySys;
 
-	@Option(shortName = "R", longName = "refs", usage = "Space-delimited list of files containing tokenized, fullform references, one per line", arrayDelim = " ")
+	@Option(longName = "refs", usage = "Space-delimited list of files containing tokenized, fullform references, one per line", arrayDelim = " ")
 	public String[] refFiles;
 
-	@Option(shortName = "b", longName = "boot-samples", usage = "Number of bootstrap replicas to draw during bootstrap resampling to estimate standard deviation for each system", defaultValue = "10000")
+	@Option(longName = "boot-samples", usage = "Number of bootstrap replicas to draw during bootstrap resampling to estimate standard deviation for each system", defaultValue = "10000")
 	private int numBootstrapSamples;
 
-	@Option(shortName = "s", longName = "ar-shuffles", usage = "Number of shuffles to perform to estimate p-value during approximate randomization test system *PAIR*", defaultValue = "10000")
+	@Option(longName = "ar-shuffles", usage = "Number of shuffles to perform to estimate p-value during approximate randomization test system *PAIR*", defaultValue = "10000")
 	private int numShuffles;
 
-	@Option(shortName = "L", longName = "latex", usage = "Latex-formatted table including measures that are commonly (or should be commonly) reported", required = false)
+	@Option(longName = "latex", usage = "Latex-formatted table including measures that are commonly (or should be commonly) reported", required = false)
 	private String latexOutFile;
 
-	@Option(shortName = "F", longName = "fullLatexDoc", usage = "Output a fully compilable Latex document instead of just the table alone", required = false, defaultValue = "false")
+	@Option(longName = "fullLatexDoc", usage = "Output a fully compilable Latex document instead of just the table alone", required = false, defaultValue = "false")
 	private boolean fullLatexDoc;
 
-	@Option(shortName = "r", longName = "rankDir", usage = "Rank hypotheses of median optimization run of each system with regard to improvement/decline over median baseline system and output to the specified directory for analysis", required = false)
+	@Option(longName = "rankDir", usage = "Rank hypotheses of median optimization run of each system with regard to improvement/decline over median baseline system and output to the specified directory for analysis", required = false)
 	private String rankDir;
 
-	@Option(shortName = "S", longName = "sentLevelDir", usage = "Score the hypotheses of each system at the sentence-level and output to the specified directory for analysis", required = false)
+	@Option(longName = "sentLevelDir", usage = "Score the hypotheses of each system at the sentence-level and output to the specified directory for analysis", required = false)
 	private String sentLevelDir;
 
-	@Option(shortName = "D", longName = "debug", usage = "Show debugging output?", required = false, defaultValue = "false")
+	@Option(longName = "debug", usage = "Show debugging output?", required = false, defaultValue = "false")
 	private boolean debug;
 
-	@Option(shortName = "t", longName = "threads", usage = "How many threads should we use? Thread-unsafe metrics will be run in a separate thread. (Zero means all available cores)", required = false, defaultValue = "0")
+	@Option(longName = "threads", usage = "How many threads should we use? Thread-unsafe metrics will be run in a separate thread. (Zero means all available cores)", required = false, defaultValue = "0")
 	private int threads;
 
 	// TODO: Lowercasing option
