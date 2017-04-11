@@ -236,7 +236,7 @@ Libraries
 
 MultEval uses the following libraries:
 
-*  METEOR 1.4 (LGPL License, http://www.cs.cmu.edu/~alavie/METEOR/ -- WordNet database has a compatible free license)
+*  METEOR 1.5 (LGPL License, http://www.cs.cmu.edu/~alavie/METEOR/ -- WordNet database has a compatible free license)
 *  Translation Error Rate 0.7 (LGPL License, TerCom, http://www.cs.umd.edu/~snover/tercom/ -- Thanks to Matt Snover for relicensing this). MultEval uses a slightly modified version of TER; the only change is that all classes have been moved from the default package into a "ter" package to overcome the Java restriction that classes in the defalut package cannot be imported across JARs.
 *  Google Guava (Apache License)
 *  Java Annotation Options (jannopts, LGPL License)
@@ -266,6 +266,6 @@ The included metrics should be cited as:
 
 Kishore Papineni, Salim Roukos, Todd Ard, and Wei-Jing Zhu, "BLEU: a method for automatic evaluation of machine translation," Proceedings of the 40th Annual Meeting of the Association for Computational Linguistics, 2002.
 
-Michael Denkowski and Alon Lavie, "Meteor 1.3: Automatic Metric for Reliable Optimization and Evaluation of Machine Translation Systems," Proceedings of the EMNLP 2011 Workshop on Statistical Machine Translation, 2011. (NOTE: MultEval uses Meteor 1.4; Meteor 1.4 is the same as Meteor 1.3, but just has support for more languages)
+Michael Denkowski and Alon Lavie, "Meteor 1.3: Automatic Metric for Reliable Optimization and Evaluation of Machine Translation Systems," Proceedings of the EMNLP 2011 Workshop on Statistical Machine Translation, 2011. (NOTE: MultEval uses Meteor 1.5; Meteor 1.5 is the same as Meteor 1.3, but just has support for more languages)
 
 Matthew Snover, Bonnie Dorr, Richard Schwartz, Linnea Micciulla, and John Makhoul, "A Study of Translation Edit Rate with Targeted Human Annotation," Proceedings of Association for Machine Translation in the Americas, 2006.
