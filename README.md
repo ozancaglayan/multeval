@@ -1,4 +1,4 @@
-Travis CI Build Status: [![Build Status](https://secure.travis-ci.org/jhclark/multeval.png?branch=master)](http://travis-ci.org/jhclark/multeval)
+This is a fork of the original `multeval` code with several improvements.
 
 Overview
 ========
