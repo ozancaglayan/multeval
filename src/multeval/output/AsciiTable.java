@@ -43,7 +43,7 @@ public class AsciiTable {
           if (results.numOptRuns > 1) {
             columns[iMetric+1] = String.format("%2.1f (%.1f/%.1f/%.2f)", avg, sSel, sTest, p);
           } else {
-            columns[iMetric+1] = String.format("%2.1f (%.1f/*/**)", avg, sSel);
+            columns[iMetric+1] = String.format("%2.1f (%.1f/*/%.2f)", avg, sSel, p);
           }
         }
       }
@@ -51,9 +51,6 @@ public class AsciiTable {
     }
     if (results.numOptRuns < 2) {
       out.println("  *  Indicates no estimate of optimizer instability due to single optimizer run. Consider multiple optimizer runs.");
-      if (sysCount > 1) {
-        out.println("  ** Indicates no p-value due to single optimizer run. Consider multiple optimizer runs.");
-      }
     }
     out.flush();
   }
