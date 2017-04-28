@@ -225,6 +225,9 @@ public class MultEvalModule implements Module {
 			DiffRanker ranker = new DiffRanker(metricNames);
 			List<List<String>> refs = data.getAllReferences();
 
+      // Do we use short names or not?
+      boolean useShortNames = (sysShortNames.length == data.getNumSystems());
+
 			int iBaselineSys = 0;
 			for (int iMetric = 0; iMetric < metrics.size(); iMetric++) {
 				int iBaselineMedianIdx =
@@ -239,10 +242,17 @@ public class MultEvalModule implements Module {
 						getSentLevelScores(metrics, data, suffStats, iBaselineSys,
 								iBaselineMedianIdx);
 
+        // Output filename prefix
+        String prefix;
+
 				for (int iSys = 1; iSys < data.getNumSystems(); iSys++) {
-					File outFile =
-							new File(rankOutDir, String.format("sys%d.sortedby.%s", (iSys + 1),
-									metricNames[iMetric]));
+				  if (useShortNames)
+				    prefix = String.format("%s", sysShortNames[iSys]);
+          else
+            prefix = String.format("sys%d", (iSys + 1));
+
+          File outFile = new File(rankOutDir,
+              String.format("%s.sortedby.%s",  prefix, metricNames[iMetric]));
 
 					int iSysMedianIdx = results.get(iMetric, iSys, Type.MEDIAN_IDX).intValue();
 
