@@ -1,4 +1,8 @@
-This is a fork of the original `multeval` code with several improvements.
+This is a fork of the original `multeval` code with mostly build related
+and cosmetic improvements.
+
+Changelog
+====
 
 Overview
 ========
@@ -11,7 +15,7 @@ Jonathan Clark, Chris Dyer, Alon Lavie, and Noah Smith, "Better Hypothesis Testi
 To keep updated on new versions of this software, subscribe to our low-traffic announcement mailing list: http://groups.google.com/group/multeval-announce. All active users are encourated to subscribe.
 
 Libraries
-=========
+---
 
 MultEval uses the following libraries:
 
@@ -20,61 +24,61 @@ MultEval uses the following libraries:
 *  Google Guava (Apache License)
 *  Java Annotation Options (jannopts, LGPL License)
 
-Adding Your Own Metric
-======================
-
-Implement the metrics.Metric interface and then add it as an option in multeval.MultEval.
-
 Usage
 =====
+
+Installation
+---
+
+You first need to put METEOR paraphrase files under `lib/data`.
+
+Now type `ant` from the command-line. `ant` is a build utility
+for Java projects that is easily installable from your distribution repository.
+Once the build process finishes, copy the generated `multeval` bash script to
+`/usr/local/bin`. You'll now be able to call `multeval` from any folder on your system.
+
+Examples
+---
 
 To evaluate a single system from the example data and get its BLEU, METEOR, and TER scores along with its standard deviation use:
 
 ``` bash
-./multeval.sh eval --refs example/refs.test2010.lc.tok.en.* \
-                   --hyps-baseline example/hyps.lc.tok.en.baseline.opt* \
-                   --meteor.language en
+$ multeval eval --refs example/refs.test2010.lc.tok.en.* \
+                --hyps-baseline example/hyps.lc.tok.en.baseline.opt* \
+                --meteor.language en
 ```
 
-The first time you run this command, METEOR (and its sizable paraphrase tables) will be downloaded. Also, to help the user determine if any tokenization mismatch happened, MultEval also prints the top OOVs according to METEOR.
+(To help the user determine if any tokenization mismatch happened, MultEval also prints the top OOVs according to METEOR.)
 
 To compare several systems from the example data and get its BLEU, METEOR, and TER scores along with their standard deviations and p-values, use:
 
 ``` bash
-./multeval.sh eval --refs example/refs.test2010.lc.tok.en.* \
-                   --hyps-baseline example/hyps.lc.tok.en.baseline.opt* \
-                   --hyps-sys1 example/hyps.lc.tok.en.sys1.opt* \
-                   --hyps-sys2 example/hyps.lc.tok.en.sys2.opt* \
-                   --meteor.language en
+multeval eval --refs example/refs.test2010.lc.tok.en.* \
+              --hyps-baseline example/hyps.lc.tok.en.baseline.opt* \
+              --hyps-sys1 example/hyps.lc.tok.en.sys1.opt* \
+              --hyps-sys2 example/hyps.lc.tok.en.sys2.opt* \
+              --meteor.language en
 ```
 
-If you'd also like 1) a Latex table at you can copy-paste into your paper and 2) the hypotheses from the median optimization run ranked by improvement/decline over your baseline system and 3) A list of sentence-level metric scores including submetrics such as BLEU precision and brevity, then run it like this:
+If you'd also like 1) a Latex table that you can copy-paste into your paper and 2) the hypotheses from the median optimization run ranked by improvement/decline over your baseline system and 3) A list of sentence-level metric scores including submetrics such as BLEU precision and brevity, then run it like this:
 
 ``` bash
-./multeval.sh eval --refs example/refs.test2010.lc.tok.en.* \
-                   --hyps-baseline example/hyps.lc.tok.en.baseline.opt* \
-                   --hyps-sys1 example/hyps.lc.tok.en.sys1.opt* \
-                   --hyps-sys2 example/hyps.lc.tok.en.sys2.opt* \
-                   --meteor.language en \
-                   --latex table.tex \
-                   --rankDir rank \
-                   --sentLevelDir sentLevel
+multeval eval --refs example/refs.test2010.lc.tok.en.* \
+              --hyps-baseline example/hyps.lc.tok.en.baseline.opt* \
+              --hyps-sys1 example/hyps.lc.tok.en.sys1.opt* \
+              --hyps-sys2 example/hyps.lc.tok.en.sys2.opt* \
+              --meteor.language en \
+              --latex table.tex \
+              --rankDir rank \
+              --sentLevelDir sentLevel
 ```
 
-All files should contain *tokenized*, lowercased, space-delimited sentences in UTF-8 encoding, one sentence per line. Unlike many metric implementations, MultEval does no tokenization or segmentation for you (see discussion below).
-
-Generally, you should evaluate full forms (i.e. without word segmentation). For languages without a canonical notion of words (e.g. Chinese, Japanese), we recommend splitting all non-Latin characters (e.g. each character that is not part of a borrowed Western word, URL, etc. should be evaluated as its own word.)
-
-For a more detailed description of the various METEOR options, please see http://github.com/mjdenkowski/meteor.
-
-METEOR and its paraphrase tables will automatically be downloaded from the web the first time you run multeval.sh. They are not included in the initial download due to the large size (~200MB) of the paraphrase tables.
-
-The ASCII table produced by multeval looks something like this:
+The ASCII table produced by MultEval looks something like this:
 
 ```
-n=3            BLEU (s_sel/s_opt/p)   METEOR (s_sel/s_opt/p) TER (s_sel/s_opt/p)    Length (s_sel/s_opt/p) 
-baseline       18.5 (0.3/0.1/-)       29.3 (0.1/0.0/-)       65.7 (0.4/0.2/-)       107.5 (0.4/0.1/-)      
-system 1       18.8 (0.3/0.3/0.00)    30.3 (0.1/0.1/0.00)    64.8 (0.4/0.6/0.00)    107.7 (0.3/0.7/0.09)   
+n=3            BLEU (s_sel/s_opt/p)   METEOR (s_sel/s_opt/p) TER (s_sel/s_opt/p)    Length (s_sel/s_opt/p)
+baseline       18.5 (0.3/0.1/-)       29.3 (0.1/0.0/-)       65.7 (0.4/0.2/-)       107.5 (0.4/0.1/-)
+system 1       18.8 (0.3/0.3/0.00)    30.3 (0.1/0.1/0.00)    64.8 (0.4/0.6/0.00)    107.7 (0.3/0.7/0.09)
 system 2       18.5 (0.3/0.1/0.00)    29.3 (0.1/0.0/0.00)    65.7 (0.4/0.2/0.00)    107.5 (0.4/0.1/0.00)
 ```
 
@@ -90,7 +94,7 @@ The LaTeX table produced by multeval looks something like this:
 
 To see a full list of options, use:
 ``` bash
-./multeval.sh eval
+multeval eval
 
 Usage: program <module_name> [options...]
 
@@ -135,8 +139,23 @@ Usage: program <module_name> [options...]
     --help                        help message
 ```
 
+Notes
+-----
+
+ - All files should contain *tokenized*, lowercased, space-delimited sentences in UTF-8 encoding, one sentence per line. Unlike many metric implementations, MultEval does no tokenization or segmentation for you (see discussion below).
+
+ - Generally, you should evaluate full forms (i.e. without word segmentation). For languages without a canonical notion of words (e.g. Chinese, Japanese), we recommend splitting all non-Latin characters (e.g. each character that is not part of a borrowed Western word, URL, etc. should be evaluated as its own word.)
+
+ - For a more detailed description of the various METEOR options, please see http://github.com/mjdenkowski/meteor.
+
+Adding Your Own Metric
+---
+
+Implement the metrics.Metric interface and then add it as an option in multeval.MultEval.
+
+
 What do p-values actually mean?
--------------------------------
+===
 
 A p-value is a model's estimate (where the model is a significance test) that a particular difference in scores arose by chance. Multeval uses approximate randomization, a test that approximates a permutation test via sampling shufflings of like hypotheses between systems.
 
@@ -204,11 +223,11 @@ all of the metrics in MultEval, and then sort the hypotheses for each sentence b
 first sentence output for each sentence is the n-best oracle. You can get this by running:
 
 ``` bash
-./multeval.sh nbest --nbest example/cdec.kbest \
-                    --refs example/cdec.ref* \
-                    --meteor.language en \
-                    --rankDir rank \
-                    > kbest.scored
+multeval nbest --nbest example/cdec.kbest \
+               --refs example/cdec.ref* \
+               --meteor.language en \
+               --rankDir rank \
+               > kbest.scored
 ```
 
 MultEval will also display the corpus-level oracle score over the n-best list according to each metric.
@@ -229,19 +248,6 @@ Comparison with Moses' multi-bleu.pl
 Moses multi-bleu.pl calculates BLEU in a slightly different way than MultEval:
 MultEval uses the "smoothed" variant of BLEU in which orders with zero matching
 n-grams but non-zero possible matches get smoothed as per a formula in Papineni's bleu-1.04.pl.
-
-
-Building
-========
-
-Should you want to build MultEval yourself instead of using the provided tarball distribution, you'll need to download meteor using get_deps.sh. Then you can just run ant:
-
-``` bash
-$ ./get_deps.sh # Download meteor
-$ ant
-```
-
-NOTE: There's a strange generics-related javac bug that's known to cause the build to fail under OpenJDK V1.6.0_17. However, this seems to be resolved as of version 1.6.0_21.
 
 
 Citation
