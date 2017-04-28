@@ -19,9 +19,6 @@ public class HypothesisManager {
   // indices: iSys, oOpt, iHyp
   private List<List<List<String>>> allHyps = new ArrayList<List<List<String>>>();
 
-  // descriptive system names
-  private List<String> descSysNames = new ArrayList<String>();
-
   private int numHyps = -1;
   private int numRefs = -1;
   private int numOptRuns = -1;
@@ -95,10 +92,6 @@ public class HypothesisManager {
     List<List<String>> sysHypsForAllOptRuns = new ArrayList<List<String>>();
     allHyps.add(sysHypsForAllOptRuns);
 
-    // Use first opt run for each set for descriptive name
-    File f = new File(hypFiles[0]);
-    descSysNames.add(f.getName());
-
     // Traverse each optimizer run for this set
     for(int iOpt = 0; iOpt < numOptRuns; iOpt++) {
       List<String> hypsForOptRun = loadSentences(hypFiles[iOpt], "Hypotheses for system " + sys + " opt run " + (iOpt + 1));
@@ -145,10 +138,6 @@ public class HypothesisManager {
   public List<String> getReferences(int iHyp) {
     // TODO: More informative error messages w/ bounds checking
     return allRefs.get(iHyp);
-  }
-
-  public List<String> getDescriptiveSysNames() {
-    return descSysNames;
   }
 
   public List<List<String>> getAllReferences() {

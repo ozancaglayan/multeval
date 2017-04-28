@@ -78,8 +78,8 @@ public class MultEvalModule implements Module {
 	@Option(longName = "threads", usage = "How many threads should we use? Thread-unsafe metrics will be run in a separate thread. (Zero means all available cores)", required = false, defaultValue = "0")
 	private int threads;
 
-	@Option(longName = "descNames", usage = "Use hypothesis base file names instead of 'system <n>' in the final report", defaultValue = "false")
-	private boolean descNames;
+	@Option(longName = "names", usage = "Give short names for each --hyps-* system that will be used instead of sys/system <n>.", defaultValue = "no", arrayDelim = " ")
+	public String[] sysShortNames;
 
 	// TODO: Lowercasing option
 
@@ -93,7 +93,7 @@ public class MultEvalModule implements Module {
 			InterruptedException {
 
 		List<Metric<?>> metrics = MultEval.loadMetrics(metricNames, opts);
-		
+
 		this.threads = MultEval.initThreads(metrics, threads);
 
 		// 1) load hyps and references
@@ -125,18 +125,20 @@ public class MultEvalModule implements Module {
 			metricNames[i] = metrics.get(i).toString();
 		}
 
+    // Do we use short names or not?
+    boolean useShortNames = (sysShortNames.length == numSystems + 1);
+    System.err.println(useShortNames);
+
     // Final array to be filled
 		String[] sysNames = new String[data.getNumSystems()];
-		// File names as descriptive names
-		String[] sysDescNames = data.getDescriptiveSysNames().toArray(new String[0]);
 
     sysNames[0] = "baseline";
-    if (descNames)
-      sysNames[0] = sysNames[0] + ": " + sysDescNames[0];
+    if (useShortNames)
+      sysNames[0] = sysNames[0] + ": " + sysShortNames[0];
     for (int i = 1; i < sysNames.length; i++) {
       sysNames[i] = "system " + i;
-      if (descNames)
-        sysNames[i] = sysNames[i] + ": " + sysDescNames[i];
+      if (useShortNames)
+        sysNames[i] = sysNames[i] + ": " + sysShortNames[i];
     }
 
 		ResultsManager results = new ResultsManager(metricNames, sysNames, data.getNumOptRuns());
