@@ -127,7 +127,6 @@ public class MultEvalModule implements Module {
 
     // Do we use short names or not?
     boolean useShortNames = (sysShortNames.length == numSystems + 1);
-    System.err.println(useShortNames);
 
     // Final array to be filled
 		String[] sysNames = new String[data.getNumSystems()];
@@ -188,30 +187,30 @@ public class MultEvalModule implements Module {
 		// penalty, etc.
 	}
 
-        private void runSentScores(List<Metric<?>> metrics, HypothesisManager data, SuffStatManager suffStats, ResultsManager results) throws FileNotFoundException {
-            if (sentLevelDir != null) {
-                File dir = new File(sentLevelDir);
-                dir.mkdirs();
-                System.err.println("Outputting sentence level scores to: " + dir.getAbsolutePath());
-                
-		final String[] submetricNames = NbestModule.getSubmetricNames(metrics);
-                SentFormatter formatter = new SentFormatter(metricNames, submetricNames);
-                List<List<String>> refs = data.getAllReferences();
+  private void runSentScores(List<Metric<?>> metrics, HypothesisManager data, SuffStatManager suffStats, ResultsManager results) throws FileNotFoundException {
+    if (sentLevelDir != null) {
+      File dir = new File(sentLevelDir);
+      dir.mkdirs();
+      System.err.println("Outputting sentence level scores to: " + dir.getAbsolutePath());
 
-                for (int iSys = 0; iSys < data.getNumSystems(); iSys++) {
-                    for (int iOpt = 0; iOpt < data.getNumOptRuns(); iOpt++) {
-                        File outFile = new File(dir, String.format("sys%d.opt%d", (iSys + 1), (iOpt+1)));
-                        double[][] sentMetricScores = getSentLevelScores(metrics, data, suffStats, iSys, iOpt);
-                        double[][] sentSubmetricScores = getSentLevelSubmetricScores(metrics, data, suffStats, iSys, iOpt);
-                        List<String> hyps = data.getHypotheses(iSys, iOpt);
-                        
-                        PrintWriter out = new PrintWriter(outFile);
-                        formatter.write(hyps, refs, sentMetricScores, sentSubmetricScores, out);
-                        out.close();
-                    }
-                }
-            }
+      final String[] submetricNames = NbestModule.getSubmetricNames(metrics);
+      SentFormatter formatter = new SentFormatter(metricNames, submetricNames);
+      List<List<String>> refs = data.getAllReferences();
+
+      for (int iSys = 0; iSys < data.getNumSystems(); iSys++) {
+        for (int iOpt = 0; iOpt < data.getNumOptRuns(); iOpt++) {
+          File outFile = new File(dir, String.format("sys%d.opt%d", (iSys + 1), (iOpt+1)));
+          double[][] sentMetricScores = getSentLevelScores(metrics, data, suffStats, iSys, iOpt);
+          double[][] sentSubmetricScores = getSentLevelSubmetricScores(metrics, data, suffStats, iSys, iOpt);
+          List<String> hyps = data.getHypotheses(iSys, iOpt);
+
+          PrintWriter out = new PrintWriter(outFile);
+          formatter.write(hyps, refs, sentMetricScores, sentSubmetricScores, out);
+          out.close();
         }
+      }
+    }
+  }
 
 	private void runDiffRankEval(List<Metric<?>> metrics, HypothesisManager data,
 			SuffStatManager suffStats, ResultsManager results) throws FileNotFoundException {
@@ -261,28 +260,28 @@ public class MultEvalModule implements Module {
 		}
 	}
 
-	private double[][] getSentLevelSubmetricScores(List<Metric<?>> metrics, HypothesisManager data,
-			SuffStatManager suffStats, int iSys, int iOpt) {
+  private double[][] getSentLevelSubmetricScores(List<Metric<?>> metrics, HypothesisManager data,
+      SuffStatManager suffStats, int iSys, int iOpt) {
 
-            int nSubmetrics = 0;
-            for (int iMetric = 0; iMetric < metrics.size(); iMetric++) {
-                nSubmetrics += metrics.get(iMetric).getSubmetricNames().length;
-            }
-            
-            double[][] result = new double[data.getNumHyps()][nSubmetrics];
-            for (int iHyp = 0; iHyp < data.getNumHyps(); iHyp++) {
-                int iSubmetric = 0;
-                for (int iMetric = 0; iMetric < metrics.size(); iMetric++) {
-                    Metric<?> metric = metrics.get(iMetric);
-                    SuffStats<?> stats = suffStats.getStats(iMetric, iSys, iOpt, iHyp);
-                    for (double sub : metric.scoreSubmetricsStats(stats)) {
-                        result[iHyp][iSubmetric] = sub;
-                        iSubmetric++;
-                    }
-                }
-            }
-            return result;
+    int nSubmetrics = 0;
+    for (int iMetric = 0; iMetric < metrics.size(); iMetric++) {
+      nSubmetrics += metrics.get(iMetric).getSubmetricNames().length;
+    }
+
+    double[][] result = new double[data.getNumHyps()][nSubmetrics];
+    for (int iHyp = 0; iHyp < data.getNumHyps(); iHyp++) {
+      int iSubmetric = 0;
+      for (int iMetric = 0; iMetric < metrics.size(); iMetric++) {
+        Metric<?> metric = metrics.get(iMetric);
+        SuffStats<?> stats = suffStats.getStats(iMetric, iSys, iOpt, iHyp);
+        for (double sub : metric.scoreSubmetricsStats(stats)) {
+          result[iHyp][iSubmetric] = sub;
+          iSubmetric++;
         }
+      }
+    }
+    return result;
+  }
 
 	private double[][] getSentLevelScores(List<Metric<?>> metrics, HypothesisManager data,
 			SuffStatManager suffStats, int iSys, int iOpt) {
@@ -294,9 +293,6 @@ public class MultEvalModule implements Module {
 				Metric<?> metric = metrics.get(iMetric);
 				SuffStats<?> stats = suffStats.getStats(iMetric, iSys, iOpt, iHyp);
 				result[iHyp][iMetric] = metric.scoreStats(stats);
-
-				// System.err.println("hyp " + (iHyp + 1) + ": " +
-				// result[iHyp][iMetric]);
 			}
 
 		}
@@ -339,7 +335,6 @@ public class MultEvalModule implements Module {
 			final int iMetricF = iMetric;
 			final Metric<?> metricMaster = metrics.get(iMetric);
 
-			//System.err.println("Collecting sufficient statistics for metric: " + metricMaster.toString());
 			MetricWorkerPool<Triple<Integer, Integer, Integer>, Metric<?>> work =
 					new MetricWorkerPool<Triple<Integer, Integer, Integer>, Metric<?>>(
 							threads, new Supplier<Metric<?>>() {
@@ -373,7 +368,6 @@ public class MultEvalModule implements Module {
 			}
 			work.waitForCompletion();
 
-			//System.err.println("Finished collecting sufficient statistics for metric: " + metricMaster.toString());
 		}
 
 		return suffStats;
