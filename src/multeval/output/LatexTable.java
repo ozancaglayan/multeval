@@ -40,7 +40,7 @@ public class LatexTable {
       out.println("\\multirow{" + sysCount + "}{*}{" + metricName + metricArrow + "}");
       for(int iSys = 0; iSys < sysCount; iSys++) {
         // Escape underscore chars from descriptive names
-        String sysName = systems[iSys].replaceAll("_", "\_");
+        String sysName = systems[iSys].replaceAll("_", "\\_");
         double avg = results.get(iMetric, iSys, Type.AVG);
         double sSel = results.get(iMetric, iSys, Type.RESAMPLED_STDDEV_AVG);
         double sTest = results.get(iMetric, iSys, Type.STDDEV);
