@@ -25,7 +25,6 @@ public class LatexTable {
     out.println("\\hline");
     out.println("\\bf Metric & \\bf System & \\bf Avg & \\bf $\\overline{s}_{\\text{sel}}$ & \\bf $s_{\\text{Test}}$ & \\bf $p$-value \\\\");
     out.println("\\hline");
-    // \multicolumn{6}{|l|}{BTEC Zh-En} \\
 
     String[] metrics = results.metricNames;
     String[] systems = results.sysNames;
@@ -33,14 +32,15 @@ public class LatexTable {
     for(int iMetric = 0; iMetric < metrics.length; iMetric++) {
       String metricName = metrics[iMetric];
 
-      String metricArrow = metricList.get(iMetric).isBiggerBetter() ? "$\\uparrow$" : "$\\downarrow$";
+      String metricArrow = metricList.get(iMetric).isBiggerBetter() ? " $\\uparrow$" : " $\\downarrow$";
       // TODO: Remove this hack
       if(metricName.equals("Length")) {
-	  metricArrow = "";
+        metricArrow = "";
       }
-      out.println("\\multirow{" + sysCount + "}{*}{" + metricName + " " + metricArrow + "}");
+      out.println("\\multirow{" + sysCount + "}{*}{" + metricName + metricArrow + "}");
       for(int iSys = 0; iSys < sysCount; iSys++) {
-        String sysName = systems[iSys];
+        // Escape underscore chars from descriptive names
+        String sysName = systems[iSys].replaceAll("_", "\_");
         double avg = results.get(iMetric, iSys, Type.AVG);
         double sSel = results.get(iMetric, iSys, Type.RESAMPLED_STDDEV_AVG);
         double sTest = results.get(iMetric, iSys, Type.STDDEV);
@@ -59,7 +59,6 @@ public class LatexTable {
     out.println("\\end{tabular}");
     out.println("\\end{footnotesize}");
     out.println("\\end{center}");
-    // out.println("\\vspace{-.2cm}");
     StringBuilder metricDescs = new StringBuilder();
     for(Metric<?> metric : metricList) {
       metricDescs.append(metric.getMetricDescription() + "; ");
