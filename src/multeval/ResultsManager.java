@@ -19,7 +19,7 @@ public class ResultsManager {
   public ResultsManager(String[] metricNames, String[] sysNames, int numOptRuns) {
     this.metricNames = metricNames;
     this.sysNames = sysNames;
-	this.numOptRuns = numOptRuns;
+  this.numOptRuns = numOptRuns;
 
     this.numMetrics = metricNames.length;
     int numSys = sysNames.length;

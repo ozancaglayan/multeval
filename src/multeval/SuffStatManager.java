@@ -20,27 +20,27 @@ public class SuffStatManager {
     this.numOpt = numOpt;
     this.numHyp = numHyp;
     this.statsBySys = new ArrayList<List<List<List<SuffStats<?>>>>>(numSys);
-    
+
     // TODO: Use more intelligent list type that allows batch grow
     // operations
-	  
+
     // presize all lists
     for(int iSys = 0; iSys < numSys; iSys++) {
-	      statsBySys.add(new ArrayList<List<List<SuffStats<?>>>>(numOpt));
-	      List<List<List<SuffStats<?>>>> statsByOpt = statsBySys.get(iSys);
-	      for(int iOpt=0; iOpt < numOpt; iOpt++) {
-	          statsByOpt.add(new ArrayList<List<SuffStats<?>>>(numMetrics));
-	          List<List<SuffStats<?>>> statsByMetric = statsByOpt.get(iOpt);
+      statsBySys.add(new ArrayList<List<List<SuffStats<?>>>>(numOpt));
+      List<List<List<SuffStats<?>>>> statsByOpt = statsBySys.get(iSys);
+      for(int iOpt=0; iOpt < numOpt; iOpt++) {
+        statsByOpt.add(new ArrayList<List<SuffStats<?>>>(numMetrics));
+        List<List<SuffStats<?>>> statsByMetric = statsByOpt.get(iOpt);
 
-	          for(int iMetric =0; iMetric < numMetrics; iMetric++) {
-			    statsByMetric.add(new ArrayList<SuffStats<?>>(numHyp));
-	            List<SuffStats<?>> statsByHyp = statsByMetric.get(iMetric);
-	            
-	            for(int iHyp=0; iHyp<numHyp; iHyp++) {
-	            	statsByHyp.add(DUMMY);
-	            }
-	          }
-	      }
+        for(int iMetric =0; iMetric < numMetrics; iMetric++) {
+          statsByMetric.add(new ArrayList<SuffStats<?>>(numHyp));
+          List<SuffStats<?>> statsByHyp = statsByMetric.get(iMetric);
+
+          for(int iHyp=0; iHyp<numHyp; iHyp++) {
+            statsByHyp.add(DUMMY);
+          }
+        }
+      }
     }
   }
 

@@ -38,98 +38,98 @@ import com.google.common.collect.Multiset.Entry;
 
 public class MultEvalModule implements Module {
 
-	@Option(longName = "metrics", usage = "Space-delimited list of metrics to use. Any of: bleu, meteor, ter, length", defaultValue = "bleu meteor ter length", arrayDelim = " ")
-	public String[] metricNames;
+  @Option(longName = "metrics", usage = "Space-delimited list of metrics to use. Any of: bleu, meteor, ter, length", defaultValue = "bleu meteor ter length", arrayDelim = " ")
+  public String[] metricNames;
 
-	@Option(longName = "hyps-baseline", usage = "Space-delimited list of files containing tokenized, fullform hypotheses, one per line", arrayDelim = " ")
-	public String[] hypFilesBaseline;
+  @Option(longName = "hyps-baseline", usage = "Space-delimited list of files containing tokenized, fullform hypotheses, one per line", arrayDelim = " ")
+  public String[] hypFilesBaseline;
 
-	// each element of the array is a system that the user designated with a
-	// number. each string element contains a space-delimited list of
-	// hypothesis files with each file containing hypotheses from one
-	// optimizer run
-	@Option(longName = "hyps-sys", usage = "Space-delimited list of files containing tokenized, fullform hypotheses, one per line", arrayDelim = " ", numberable = true)
-	public String[] hypFilesBySys;
+  // each element of the array is a system that the user designated with a
+  // number. each string element contains a space-delimited list of
+  // hypothesis files with each file containing hypotheses from one
+  // optimizer run
+  @Option(longName = "hyps-sys", usage = "Space-delimited list of files containing tokenized, fullform hypotheses, one per line", arrayDelim = " ", numberable = true)
+  public String[] hypFilesBySys;
 
-	@Option(longName = "refs", usage = "Space-delimited list of files containing tokenized, fullform references, one per line", arrayDelim = " ")
-	public String[] refFiles;
+  @Option(longName = "refs", usage = "Space-delimited list of files containing tokenized, fullform references, one per line", arrayDelim = " ")
+  public String[] refFiles;
 
-	@Option(longName = "boot-samples", usage = "Number of bootstrap replicas to draw during bootstrap resampling to estimate standard deviation for each system", defaultValue = "10000")
-	private int numBootstrapSamples;
+  @Option(longName = "boot-samples", usage = "Number of bootstrap replicas to draw during bootstrap resampling to estimate standard deviation for each system", defaultValue = "10000")
+  private int numBootstrapSamples;
 
-	@Option(longName = "ar-shuffles", usage = "Number of shuffles to perform to estimate p-value during approximate randomization test system *PAIR*", defaultValue = "10000")
-	private int numShuffles;
+  @Option(longName = "ar-shuffles", usage = "Number of shuffles to perform to estimate p-value during approximate randomization test system *PAIR*", defaultValue = "10000")
+  private int numShuffles;
 
-	@Option(longName = "latex", usage = "Latex-formatted table including measures that are commonly (or should be commonly) reported", required = false)
-	private String latexOutFile;
+  @Option(longName = "latex", usage = "Latex-formatted table including measures that are commonly (or should be commonly) reported", required = false)
+  private String latexOutFile;
 
-	@Option(longName = "fullLatexDoc", usage = "Output a fully compilable Latex document instead of just the table alone", required = false, defaultValue = "false")
-	private boolean fullLatexDoc;
+  @Option(longName = "fullLatexDoc", usage = "Output a fully compilable Latex document instead of just the table alone", required = false, defaultValue = "false")
+  private boolean fullLatexDoc;
 
-	@Option(longName = "rankDir", usage = "Rank hypotheses of median optimization run of each system with regard to improvement/decline over median baseline system and output to the specified directory for analysis", required = false)
-	private String rankDir;
+  @Option(longName = "rankDir", usage = "Rank hypotheses of median optimization run of each system with regard to improvement/decline over median baseline system and output to the specified directory for analysis", required = false)
+  private String rankDir;
 
-	@Option(longName = "sentLevelDir", usage = "Score the hypotheses of each system at the sentence-level and output to the specified directory for analysis", required = false)
-	private String sentLevelDir;
+  @Option(longName = "sentLevelDir", usage = "Score the hypotheses of each system at the sentence-level and output to the specified directory for analysis", required = false)
+  private String sentLevelDir;
 
-	@Option(longName = "debug", usage = "Show debugging output?", required = false, defaultValue = "false")
-	private boolean debug;
+  @Option(longName = "debug", usage = "Show debugging output?", required = false, defaultValue = "false")
+  private boolean debug;
 
-	@Option(longName = "threads", usage = "How many threads should we use? Thread-unsafe metrics will be run in a separate thread. (Zero means all available cores)", required = false, defaultValue = "0")
-	private int threads;
+  @Option(longName = "threads", usage = "How many threads should we use? Thread-unsafe metrics will be run in a separate thread. (Zero means all available cores)", required = false, defaultValue = "0")
+  private int threads;
 
-	@Option(longName = "names", usage = "Give short names for each --hyps-* system that will be used instead of sys/system <n>.", defaultValue = "no", arrayDelim = " ")
-	public String[] sysShortNames;
+  @Option(longName = "names", usage = "Give short names for each --hyps-* system that will be used instead of sys/system <n>.", defaultValue = "no", arrayDelim = " ")
+  public String[] sysShortNames;
 
-	// TODO: Lowercasing option
+  // TODO: Lowercasing option
 
-	@Override
-	public Iterable<Class<?>> getDynamicConfigurables() {
-		return ImmutableList.<Class<?>> of(BLEU.class, multeval.metrics.METEOR.class, TER.class);
-	}
+  @Override
+  public Iterable<Class<?>> getDynamicConfigurables() {
+    return ImmutableList.<Class<?>> of(BLEU.class, multeval.metrics.METEOR.class, TER.class);
+  }
 
-	@Override
-	public void run(Configurator opts) throws ConfigurationException, FileNotFoundException,
-			InterruptedException {
+  @Override
+  public void run(Configurator opts) throws ConfigurationException, FileNotFoundException,
+      InterruptedException {
 
-		List<Metric<?>> metrics = MultEval.loadMetrics(metricNames, opts);
+    List<Metric<?>> metrics = MultEval.loadMetrics(metricNames, opts);
 
-		this.threads = MultEval.initThreads(metrics, threads);
+    this.threads = MultEval.initThreads(metrics, threads);
 
-		// 1) load hyps and references
-		// first index is opt run, second is hyp
-		int numSystems = hypFilesBySys == null ? 0 : hypFilesBySys.length;
-		String[][] hypFilesBySysSplit = new String[numSystems][];
-		for (int i = 0; i < numSystems; i++) {
-			hypFilesBySysSplit[i] = StringUtils.split(hypFilesBySys[i], " ", Integer.MAX_VALUE);
-		}
+    // 1) load hyps and references
+    // first index is opt run, second is hyp
+    int numSystems = hypFilesBySys == null ? 0 : hypFilesBySys.length;
+    String[][] hypFilesBySysSplit = new String[numSystems][];
+    for (int i = 0; i < numSystems; i++) {
+      hypFilesBySysSplit[i] = StringUtils.split(hypFilesBySys[i], " ", Integer.MAX_VALUE);
+    }
 
-		HypothesisManager data = new HypothesisManager();
-		try {
-			data.loadData(hypFilesBaseline, hypFilesBySysSplit, refFiles);
-		} catch (IOException e) {
-			System.err.println("Error while loading data.");
-			e.printStackTrace();
-			System.exit(1);
-		}
+    HypothesisManager data = new HypothesisManager();
+    try {
+      data.loadData(hypFilesBaseline, hypFilesBySysSplit, refFiles);
+    } catch (IOException e) {
+      System.err.println("Error while loading data.");
+      e.printStackTrace();
+      System.exit(1);
+    }
 
-		// 2) collect sufficient stats for each metric selected
-		Stopwatch watch = new Stopwatch();
-		watch.start();
-		SuffStatManager suffStats = collectSuffStats(metrics, data);
-		watch.stop();
-		System.err.println("Collected suff stats in " + watch.toString(3));
+    // 2) collect sufficient stats for each metric selected
+    Stopwatch watch = new Stopwatch();
+    watch.start();
+    SuffStatManager suffStats = collectSuffStats(metrics, data);
+    watch.stop();
+    System.err.println("Collected suff stats in " + watch.toString(3));
 
-		String[] metricNames = new String[metrics.size()];
-		for (int i = 0; i < metricNames.length; i++) {
-			metricNames[i] = metrics.get(i).toString();
-		}
+    String[] metricNames = new String[metrics.size()];
+    for (int i = 0; i < metricNames.length; i++) {
+      metricNames[i] = metrics.get(i).toString();
+    }
 
     // Do we use short names or not?
     boolean useShortNames = (sysShortNames.length == numSystems + 1);
 
     // Final array to be filled
-		String[] sysNames = new String[data.getNumSystems()];
+    String[] sysNames = new String[data.getNumSystems()];
 
     sysNames[0] = "baseline";
     if (useShortNames)
@@ -140,52 +140,52 @@ public class MultEvalModule implements Module {
         sysNames[i] = sysNames[i] + ": " + sysShortNames[i];
     }
 
-		ResultsManager results = new ResultsManager(metricNames, sysNames, data.getNumOptRuns());
+    ResultsManager results = new ResultsManager(metricNames, sysNames, data.getNumOptRuns());
 
-		// 3) evaluate each system and report the average scores
-		runOverallEval(metrics, data, suffStats, results);
-		runOOVAnalysis(metrics, data, suffStats, results);
+    // 3) evaluate each system and report the average scores
+    runOverallEval(metrics, data, suffStats, results);
+    runOOVAnalysis(metrics, data, suffStats, results);
 
     // output sentence-level scores, if requested
     runSentScores(metrics, data, suffStats, results);
 
-		// run diff ranking, if requested (MUST be run after overall eval,
-		// which computes median systems)
-		runDiffRankEval(metrics, data, suffStats, results);
+    // run diff ranking, if requested (MUST be run after overall eval,
+    // which computes median systems)
+    runDiffRankEval(metrics, data, suffStats, results);
 
-		// 4) run bootstrap resampling for each system, for each
-		// optimization run
-		watch.reset();
-		watch.start();
-		runBootstrapResampling(metrics, data, suffStats, results);
-		watch.stop();
-		System.err.println("Performed bootstrap resampling in " + watch.toString(3));
+    // 4) run bootstrap resampling for each system, for each
+    // optimization run
+    watch.reset();
+    watch.start();
+    runBootstrapResampling(metrics, data, suffStats, results);
+    watch.stop();
+    System.err.println("Performed bootstrap resampling in " + watch.toString(3));
 
-		// 5) run AR -- FOR EACH SYSTEM PAIR
-		watch.reset();
-		watch.start();
-		runApproximateRandomization(metrics, data, suffStats, results);
-		watch.stop();
-		if(data.getNumSystems() > 1) {
-			System.err.println("Performed approximate randomization in " + watch.toString(3));
-		}
+    // 5) run AR -- FOR EACH SYSTEM PAIR
+    watch.reset();
+    watch.start();
+    runApproximateRandomization(metrics, data, suffStats, results);
+    watch.stop();
+    if(data.getNumSystems() > 1) {
+      System.err.println("Performed approximate randomization in " + watch.toString(3));
+    }
 
-		// 6) output pretty table
-		if (latexOutFile != null) {
-			LatexTable table = new LatexTable();
-			File file = new File(latexOutFile);
-			System.err.println("Writing Latex table to " + file.getAbsolutePath());
-			PrintWriter out = new PrintWriter(file);
-			table.write(results, metrics, out, fullLatexDoc);
-			out.close();
-		}
+    // 6) output pretty table
+    if (latexOutFile != null) {
+      LatexTable table = new LatexTable();
+      File file = new File(latexOutFile);
+      System.err.println("Writing Latex table to " + file.getAbsolutePath());
+      PrintWriter out = new PrintWriter(file);
+      table.write(results, metrics, out, fullLatexDoc);
+      out.close();
+    }
 
-		AsciiTable table = new AsciiTable();
-		table.write(results, System.out);
+    AsciiTable table = new AsciiTable();
+    table.write(results, System.out);
 
-		// 7) show statistics such as most frequent OOV's length, brevity
-		// penalty, etc.
-	}
+    // 7) show statistics such as most frequent OOV's length, brevity
+    // penalty, etc.
+  }
 
   private void runSentScores(List<Metric<?>> metrics, HypothesisManager data, SuffStatManager suffStats, ResultsManager results) throws FileNotFoundException {
     if (sentLevelDir != null) {
@@ -212,63 +212,63 @@ public class MultEvalModule implements Module {
     }
   }
 
-	private void runDiffRankEval(List<Metric<?>> metrics, HypothesisManager data,
-			SuffStatManager suffStats, ResultsManager results) throws FileNotFoundException {
+  private void runDiffRankEval(List<Metric<?>> metrics, HypothesisManager data,
+      SuffStatManager suffStats, ResultsManager results) throws FileNotFoundException {
 
-		if (rankDir != null) {
+    if (rankDir != null) {
 
-			File rankOutDir = new File(rankDir);
-			rankOutDir.mkdirs();
-			System.err.println("Outputting ranked hypotheses to: "
-					+ rankOutDir.getAbsolutePath());
+      File rankOutDir = new File(rankDir);
+      rankOutDir.mkdirs();
+      System.err.println("Outputting ranked hypotheses to: "
+          + rankOutDir.getAbsolutePath());
 
-			DiffRanker ranker = new DiffRanker(metricNames);
-			List<List<String>> refs = data.getAllReferences();
+      DiffRanker ranker = new DiffRanker(metricNames);
+      List<List<String>> refs = data.getAllReferences();
 
       // Do we use short names or not?
       boolean useShortNames = (sysShortNames.length == data.getNumSystems());
 
-			int iBaselineSys = 0;
-			for (int iMetric = 0; iMetric < metrics.size(); iMetric++) {
-				int iBaselineMedianIdx =
-						results.get(iMetric, iBaselineSys, Type.MEDIAN_IDX).intValue();
-				List<String> hypsMedianBaseline =
-						data.getHypotheses(iBaselineSys, iBaselineMedianIdx);
+      int iBaselineSys = 0;
+      for (int iMetric = 0; iMetric < metrics.size(); iMetric++) {
+        int iBaselineMedianIdx =
+            results.get(iMetric, iBaselineSys, Type.MEDIAN_IDX).intValue();
+        List<String> hypsMedianBaseline =
+            data.getHypotheses(iBaselineSys, iBaselineMedianIdx);
 
-				// we must always recalculate all metric scores since
-				// the median system might change based on which metric
-				// we're sorting by
-				double[][] sentMetricScoresBaseline =
-						getSentLevelScores(metrics, data, suffStats, iBaselineSys,
-								iBaselineMedianIdx);
+        // we must always recalculate all metric scores since
+        // the median system might change based on which metric
+        // we're sorting by
+        double[][] sentMetricScoresBaseline =
+            getSentLevelScores(metrics, data, suffStats, iBaselineSys,
+                iBaselineMedianIdx);
 
         // Output filename prefix
         String prefix;
 
-				for (int iSys = 1; iSys < data.getNumSystems(); iSys++) {
-				  if (useShortNames)
-				    prefix = String.format("%s", sysShortNames[iSys]);
+        for (int iSys = 1; iSys < data.getNumSystems(); iSys++) {
+          if (useShortNames)
+            prefix = String.format("%s", sysShortNames[iSys]);
           else
             prefix = String.format("sys%d", (iSys + 1));
 
           File outFile = new File(rankOutDir,
               String.format("%s.sortedby.%s",  prefix, metricNames[iMetric]));
 
-					int iSysMedianIdx = results.get(iMetric, iSys, Type.MEDIAN_IDX).intValue();
+          int iSysMedianIdx = results.get(iMetric, iSys, Type.MEDIAN_IDX).intValue();
 
-					List<String> hypsMedianSys = data.getHypotheses(iSys, iSysMedianIdx);
+          List<String> hypsMedianSys = data.getHypotheses(iSys, iSysMedianIdx);
 
-					double[][] sentMetricScoresSys =
-							getSentLevelScores(metrics, data, suffStats, iSys, iSysMedianIdx);
+          double[][] sentMetricScoresSys =
+              getSentLevelScores(metrics, data, suffStats, iSys, iSysMedianIdx);
 
-					PrintWriter out = new PrintWriter(outFile);
-					ranker.write(hypsMedianBaseline, hypsMedianSys, refs,
-							sentMetricScoresBaseline, sentMetricScoresSys, iMetric, out);
-					out.close();
-				}
-			}
-		}
-	}
+          PrintWriter out = new PrintWriter(outFile);
+          ranker.write(hypsMedianBaseline, hypsMedianSys, refs,
+              sentMetricScoresBaseline, sentMetricScoresSys, iMetric, out);
+          out.close();
+        }
+      }
+    }
+  }
 
   private double[][] getSentLevelSubmetricScores(List<Metric<?>> metrics, HypothesisManager data,
       SuffStatManager suffStats, int iSys, int iOpt) {
@@ -293,218 +293,218 @@ public class MultEvalModule implements Module {
     return result;
   }
 
-	private double[][] getSentLevelScores(List<Metric<?>> metrics, HypothesisManager data,
-			SuffStatManager suffStats, int iSys, int iOpt) {
+  private double[][] getSentLevelScores(List<Metric<?>> metrics, HypothesisManager data,
+      SuffStatManager suffStats, int iSys, int iOpt) {
 
-		double[][] result = new double[data.getNumHyps()][metrics.size()];
-		for (int iHyp = 0; iHyp < data.getNumHyps(); iHyp++) {
-			for (int iMetric = 0; iMetric < metrics.size(); iMetric++) {
+    double[][] result = new double[data.getNumHyps()][metrics.size()];
+    for (int iHyp = 0; iHyp < data.getNumHyps(); iHyp++) {
+      for (int iMetric = 0; iMetric < metrics.size(); iMetric++) {
 
-				Metric<?> metric = metrics.get(iMetric);
-				SuffStats<?> stats = suffStats.getStats(iMetric, iSys, iOpt, iHyp);
-				result[iHyp][iMetric] = metric.scoreStats(stats);
-			}
+        Metric<?> metric = metrics.get(iMetric);
+        SuffStats<?> stats = suffStats.getStats(iMetric, iSys, iOpt, iHyp);
+        result[iHyp][iMetric] = metric.scoreStats(stats);
+      }
 
-		}
-		return result;
-	}
+    }
+    return result;
+  }
 
-	private void runApproximateRandomization(List<Metric<?>> metrics, HypothesisManager data,
-			SuffStatManager suffStats, ResultsManager results) throws InterruptedException {
+  private void runApproximateRandomization(List<Metric<?>> metrics, HypothesisManager data,
+      SuffStatManager suffStats, ResultsManager results) throws InterruptedException {
 
-		int iBaselineSys = 0;
-		for (int iSys = 1; iSys < data.getNumSystems(); iSys++) {
+    int iBaselineSys = 0;
+    for (int iSys = 1; iSys < data.getNumSystems(); iSys++) {
 
-			System.err.println("Performing approximate randomization to estimate p-value between baseline system and system "
-					+ (iSys + 1) + " (of " + data.getNumSystems() + ")");
+      System.err.println("Performing approximate randomization to estimate p-value between baseline system and system "
+          + (iSys + 1) + " (of " + data.getNumSystems() + ")");
 
-			// index 1: metric, index 2: hypothesis, inner array: suff stats
-			List<List<SuffStats<?>>> suffStatsBaseline =
-					suffStats.getStatsAllOptForSys(iBaselineSys);
-			List<List<SuffStats<?>>> suffStatsSysI = suffStats.getStatsAllOptForSys(iSys);
+      // index 1: metric, index 2: hypothesis, inner array: suff stats
+      List<List<SuffStats<?>>> suffStatsBaseline =
+          suffStats.getStatsAllOptForSys(iBaselineSys);
+      List<List<SuffStats<?>>> suffStatsSysI = suffStats.getStatsAllOptForSys(iSys);
 
-			StratifiedApproximateRandomizationTest ar =
-					new StratifiedApproximateRandomizationTest(threads, metrics, suffStatsBaseline,
-							suffStatsSysI, data.getNumHyps(), data.getNumOptRuns(), debug);
-			double[] pByMetric = ar.getTwoSidedP(numShuffles);
-			for (int iMetric = 0; iMetric < metrics.size(); iMetric++) {
-				results.report(iMetric, iSys, Type.P_VALUE, pByMetric[iMetric]);
-			}
-		}
-	}
+      StratifiedApproximateRandomizationTest ar =
+          new StratifiedApproximateRandomizationTest(threads, metrics, suffStatsBaseline,
+              suffStatsSysI, data.getNumHyps(), data.getNumOptRuns(), debug);
+      double[] pByMetric = ar.getTwoSidedP(numShuffles);
+      for (int iMetric = 0; iMetric < metrics.size(); iMetric++) {
+        results.report(iMetric, iSys, Type.P_VALUE, pByMetric[iMetric]);
+      }
+    }
+  }
 
-	private SuffStatManager collectSuffStats(List<Metric<?>> metrics,
-			final HypothesisManager data) throws InterruptedException {
+  private SuffStatManager collectSuffStats(List<Metric<?>> metrics,
+      final HypothesisManager data) throws InterruptedException {
 
-		final SuffStatManager suffStats =
-				new SuffStatManager(metrics.size(), data.getNumSystems(), data.getNumOptRuns(),
-						data.getNumHyps());
+    final SuffStatManager suffStats =
+        new SuffStatManager(metrics.size(), data.getNumSystems(), data.getNumOptRuns(),
+            data.getNumHyps());
 
-		// parallelize at the hypothesis level
-		for (int iMetric = 0; iMetric < metrics.size(); iMetric++) {
-			final int iMetricF = iMetric;
-			final Metric<?> metricMaster = metrics.get(iMetric);
+    // parallelize at the hypothesis level
+    for (int iMetric = 0; iMetric < metrics.size(); iMetric++) {
+      final int iMetricF = iMetric;
+      final Metric<?> metricMaster = metrics.get(iMetric);
 
-			MetricWorkerPool<Triple<Integer, Integer, Integer>, Metric<?>> work =
-					new MetricWorkerPool<Triple<Integer, Integer, Integer>, Metric<?>>(
-							threads, new Supplier<Metric<?>>() {
-								@Override
-								public Metric<?> get() {
-									return metricMaster.threadClone();
-								}
-							}) {
+      MetricWorkerPool<Triple<Integer, Integer, Integer>, Metric<?>> work =
+          new MetricWorkerPool<Triple<Integer, Integer, Integer>, Metric<?>>(
+              threads, new Supplier<Metric<?>>() {
+                @Override
+                public Metric<?> get() {
+                  return metricMaster.threadClone();
+                }
+              }) {
 
-						@Override
-						public void doWork(Metric<?> metricCopy,
-								Triple<Integer, Integer, Integer> trip) {
-							int iSys = trip.first;
-							int iOpt = trip.second;
-							int iHyp = trip.third;
+            @Override
+            public void doWork(Metric<?> metricCopy,
+                Triple<Integer, Integer, Integer> trip) {
+              int iSys = trip.first;
+              int iOpt = trip.second;
+              int iHyp = trip.third;
 
-							String hyp = data.getHypothesis(iSys, iOpt, iHyp);
-							List<String> refs = data.getReferences(iHyp);
-							SuffStats<?> stats = metricCopy.stats(hyp, refs);
-							suffStats.saveStats(iMetricF, iSys, iOpt, iHyp, stats);
-						}
-					};
+              String hyp = data.getHypothesis(iSys, iOpt, iHyp);
+              List<String> refs = data.getReferences(iHyp);
+              SuffStats<?> stats = metricCopy.stats(hyp, refs);
+              suffStats.saveStats(iMetricF, iSys, iOpt, iHyp, stats);
+            }
+          };
 
-			work.start();
-			for (int iSys = 0; iSys < data.getNumSystems(); iSys++) {
-				for (int iOpt = 0; iOpt < data.getNumOptRuns(); iOpt++) {
-					for (int iHyp = 0; iHyp < data.getNumHyps(); iHyp++) {
-						work.addTask(new Triple<Integer, Integer, Integer>(iSys, iOpt, iHyp));
-					}
-				}
-			}
-			work.waitForCompletion();
+      work.start();
+      for (int iSys = 0; iSys < data.getNumSystems(); iSys++) {
+        for (int iOpt = 0; iOpt < data.getNumOptRuns(); iOpt++) {
+          for (int iHyp = 0; iHyp < data.getNumHyps(); iHyp++) {
+            work.addTask(new Triple<Integer, Integer, Integer>(iSys, iOpt, iHyp));
+          }
+        }
+      }
+      work.waitForCompletion();
 
-		}
+    }
 
-		return suffStats;
-	}
+    return suffStats;
+  }
 
-	private void runOverallEval(List<Metric<?>> metrics, HypothesisManager data,
-			SuffStatManager suffStats, ResultsManager results) {
+  private void runOverallEval(List<Metric<?>> metrics, HypothesisManager data,
+      SuffStatManager suffStats, ResultsManager results) {
 
-		for (int iMetric = 0; iMetric < metrics.size(); iMetric++) {
-			Metric<?> metric = metrics.get(iMetric);
-			System.err.println("Scoring with metric: " + metric.toString());
+    for (int iMetric = 0; iMetric < metrics.size(); iMetric++) {
+      Metric<?> metric = metrics.get(iMetric);
+      System.err.println("Scoring with metric: " + metric.toString());
 
-			for (int iSys = 0; iSys < data.getNumSystems(); iSys++) {
-				double[] scoresByOptRun = new double[data.getNumOptRuns()];
-				for (int iOpt = 0; iOpt < data.getNumOptRuns(); iOpt++) {
-					List<SuffStats<?>> statsBySent = suffStats.getStats(iMetric, iSys, iOpt);
-					SuffStats<?> corpusStats = SuffStatUtils.sumStats(statsBySent);
-					scoresByOptRun[iOpt] = metric.scoreStats(corpusStats);
-				}
-				double avg = MathUtils.average(scoresByOptRun);
-				double stddev = MathUtils.stddev(scoresByOptRun);
-				double min = MathUtils.min(scoresByOptRun);
-				double max = MathUtils.max(scoresByOptRun);
-				int medianIdx = MathUtils.medianIndex(scoresByOptRun);
-				double median = scoresByOptRun[medianIdx];
+      for (int iSys = 0; iSys < data.getNumSystems(); iSys++) {
+        double[] scoresByOptRun = new double[data.getNumOptRuns()];
+        for (int iOpt = 0; iOpt < data.getNumOptRuns(); iOpt++) {
+          List<SuffStats<?>> statsBySent = suffStats.getStats(iMetric, iSys, iOpt);
+          SuffStats<?> corpusStats = SuffStatUtils.sumStats(statsBySent);
+          scoresByOptRun[iOpt] = metric.scoreStats(corpusStats);
+        }
+        double avg = MathUtils.average(scoresByOptRun);
+        double stddev = MathUtils.stddev(scoresByOptRun);
+        double min = MathUtils.min(scoresByOptRun);
+        double max = MathUtils.max(scoresByOptRun);
+        int medianIdx = MathUtils.medianIndex(scoresByOptRun);
+        double median = scoresByOptRun[medianIdx];
 
-				results.report(iMetric, iSys, Type.AVG, avg);
-				results.report(iMetric, iSys, Type.MEDIAN, median);
-				results.report(iMetric, iSys, Type.STDDEV, stddev);
-				results.report(iMetric, iSys, Type.MIN, min);
-				results.report(iMetric, iSys, Type.MAX, max);
-				results.report(iMetric, iSys, Type.MEDIAN_IDX, medianIdx);
-			}
-		}
-	}
+        results.report(iMetric, iSys, Type.AVG, avg);
+        results.report(iMetric, iSys, Type.MEDIAN, median);
+        results.report(iMetric, iSys, Type.STDDEV, stddev);
+        results.report(iMetric, iSys, Type.MIN, min);
+        results.report(iMetric, iSys, Type.MAX, max);
+        results.report(iMetric, iSys, Type.MEDIAN_IDX, medianIdx);
+      }
+    }
+  }
 
-	private void runOOVAnalysis(List<Metric<?>> metrics, HypothesisManager data,
-			SuffStatManager suffStats, ResultsManager results) {
+  private void runOOVAnalysis(List<Metric<?>> metrics, HypothesisManager data,
+      SuffStatManager suffStats, ResultsManager results) {
 
-		for (int iMetric = 0; iMetric < metrics.size(); iMetric++) {
-			Metric<?> metric = metrics.get(iMetric);
+    for (int iMetric = 0; iMetric < metrics.size(); iMetric++) {
+      Metric<?> metric = metrics.get(iMetric);
 
-			// just do this with METEOR since it's the most forgiving
-			if (metric instanceof multeval.metrics.METEOR) {
-				multeval.metrics.METEOR meteor = (multeval.metrics.METEOR) metric;
+      // just do this with METEOR since it's the most forgiving
+      if (metric instanceof multeval.metrics.METEOR) {
+        multeval.metrics.METEOR meteor = (multeval.metrics.METEOR) metric;
 
-				for (int iSys = 0; iSys < data.getNumSystems(); iSys++) {
-					Multiset<String> unmatchedHypWords = HashMultiset.create();
-					Multiset<String> unmatchedRefWords = HashMultiset.create();
-					int medianIdx = results.get(iMetric, iSys, Type.MEDIAN_IDX).intValue();
+        for (int iSys = 0; iSys < data.getNumSystems(); iSys++) {
+          Multiset<String> unmatchedHypWords = HashMultiset.create();
+          Multiset<String> unmatchedRefWords = HashMultiset.create();
+          int medianIdx = results.get(iMetric, iSys, Type.MEDIAN_IDX).intValue();
 
-					List<SuffStats<?>> statsBySent =
-							suffStats.getStats(iMetric, iSys, medianIdx);
-					for (int iHyp = 0; iHyp < data.getNumHyps(); iHyp++) {
-						METEORStats sentStats = (METEORStats) statsBySent.get(iHyp);
-						unmatchedHypWords.addAll(meteor.getUnmatchedHypWords(sentStats));
-						unmatchedRefWords.addAll(meteor.getUnmatchedRefWords(sentStats));
-					}
+          List<SuffStats<?>> statsBySent =
+              suffStats.getStats(iMetric, iSys, medianIdx);
+          for (int iHyp = 0; iHyp < data.getNumHyps(); iHyp++) {
+            METEORStats sentStats = (METEORStats) statsBySent.get(iHyp);
+            unmatchedHypWords.addAll(meteor.getUnmatchedHypWords(sentStats));
+            unmatchedRefWords.addAll(meteor.getUnmatchedRefWords(sentStats));
+          }
 
-					// print OOVs for this system
-					List<Entry<String>> unmatchedHypWordsSorted =
-							CollectionUtils.sortByCount(unmatchedHypWords);
-					List<Entry<String>> unmatchedRefWordsSorted =
-							CollectionUtils.sortByCount(unmatchedRefWords);
+          // print OOVs for this system
+          List<Entry<String>> unmatchedHypWordsSorted =
+              CollectionUtils.sortByCount(unmatchedHypWords);
+          List<Entry<String>> unmatchedRefWordsSorted =
+              CollectionUtils.sortByCount(unmatchedRefWords);
 
-					int nHead = 10;
-					System.err.println("Top unmatched hypothesis words according to METEOR: "
-							+ CollectionUtils.head(unmatchedHypWordsSorted, nHead));
-					System.err.println("Top unmatched reference words according to METEOR: "
-							+ CollectionUtils.head(unmatchedRefWordsSorted, nHead));
-				}
-			}
-		}
-	}
+          int nHead = 10;
+          System.err.println("Top unmatched hypothesis words according to METEOR: "
+              + CollectionUtils.head(unmatchedHypWordsSorted, nHead));
+          System.err.println("Top unmatched reference words according to METEOR: "
+              + CollectionUtils.head(unmatchedRefWordsSorted, nHead));
+        }
+      }
+    }
+  }
 
-	private void runBootstrapResampling(List<Metric<?>> metrics, HypothesisManager data,
-			SuffStatManager suffStats, ResultsManager results) throws InterruptedException {
-		for (int iSys = 0; iSys < data.getNumSystems(); iSys++) {
+  private void runBootstrapResampling(List<Metric<?>> metrics, HypothesisManager data,
+      SuffStatManager suffStats, ResultsManager results) throws InterruptedException {
+    for (int iSys = 0; iSys < data.getNumSystems(); iSys++) {
 
-			double[] meanByMetric = new double[metrics.size()];
-			double[] stddevByMetric = new double[metrics.size()];
-			double[] minByMetric = new double[metrics.size()];
-			double[] maxByMetric = new double[metrics.size()];
+      double[] meanByMetric = new double[metrics.size()];
+      double[] stddevByMetric = new double[metrics.size()];
+      double[] minByMetric = new double[metrics.size()];
+      double[] maxByMetric = new double[metrics.size()];
 
-			for (int i = 0; i < metrics.size(); i++) {
-				minByMetric[i] = Double.MAX_VALUE;
-				maxByMetric[i] = Double.MIN_VALUE;
-			}
+      for (int i = 0; i < metrics.size(); i++) {
+        minByMetric[i] = Double.MAX_VALUE;
+        maxByMetric[i] = Double.MIN_VALUE;
+      }
 
-			for (int iOpt = 0; iOpt < data.getNumOptRuns(); iOpt++) {
+      for (int iOpt = 0; iOpt < data.getNumOptRuns(); iOpt++) {
 
-				System.err.println("Performing bootstrap resampling to estimate stddev for test set selection (System "
-						+ (iSys + 1)
-						+ " of "
-						+ data.getNumSystems()
-						+ "; opt run "
-						+ (iOpt + 1) + " of " + data.getNumOptRuns() + ")");
+        System.err.println("Performing bootstrap resampling to estimate stddev for test set selection (System "
+            + (iSys + 1)
+            + " of "
+            + data.getNumSystems()
+            + "; opt run "
+            + (iOpt + 1) + " of " + data.getNumOptRuns() + ")");
 
-				// index 1: metric, index 2: hypothesis, inner array: suff
-				// stats
-				List<List<SuffStats<?>>> suffStatsSysI = suffStats.getStats(iSys, iOpt);
-				BootstrapResampler boot = new BootstrapResampler(threads, metrics, suffStatsSysI);
-				List<double[]> sampledScoresByMetric = boot.resample(numBootstrapSamples);
+        // index 1: metric, index 2: hypothesis, inner array: suff
+        // stats
+        List<List<SuffStats<?>>> suffStatsSysI = suffStats.getStats(iSys, iOpt);
+        BootstrapResampler boot = new BootstrapResampler(threads, metrics, suffStatsSysI);
+        List<double[]> sampledScoresByMetric = boot.resample(numBootstrapSamples);
 
-				for (int iMetric = 0; iMetric < metrics.size(); iMetric++) {
-					double[] sampledScores = sampledScoresByMetric.get(iMetric);
+        for (int iMetric = 0; iMetric < metrics.size(); iMetric++) {
+          double[] sampledScores = sampledScoresByMetric.get(iMetric);
 
-					double mean = MathUtils.average(sampledScores);
-					double stddev = MathUtils.stddev(sampledScores);
-					double min = MathUtils.min(sampledScores);
-					double max = MathUtils.max(sampledScores);
-					// TODO: also include 95% CI?
+          double mean = MathUtils.average(sampledScores);
+          double stddev = MathUtils.stddev(sampledScores);
+          double min = MathUtils.min(sampledScores);
+          double max = MathUtils.max(sampledScores);
+          // TODO: also include 95% CI?
 
-					meanByMetric[iMetric] += mean / data.getNumOptRuns();
-					stddevByMetric[iMetric] += stddev / data.getNumOptRuns();
-					minByMetric[iMetric] = Math.min(min, minByMetric[iMetric]);
-					maxByMetric[iMetric] = Math.max(max, maxByMetric[iMetric]);
-				}
-			}
+          meanByMetric[iMetric] += mean / data.getNumOptRuns();
+          stddevByMetric[iMetric] += stddev / data.getNumOptRuns();
+          minByMetric[iMetric] = Math.min(min, minByMetric[iMetric]);
+          maxByMetric[iMetric] = Math.max(max, maxByMetric[iMetric]);
+        }
+      }
 
-			for (int iMetric = 0; iMetric < metrics.size(); iMetric++) {
-				results.report(iMetric, iSys, Type.RESAMPLED_MEAN_AVG, meanByMetric[iMetric]);
-				results.report(iMetric, iSys, Type.RESAMPLED_STDDEV_AVG,
-						stddevByMetric[iMetric]);
-				results.report(iMetric, iSys, Type.RESAMPLED_MIN, minByMetric[iMetric]);
-				results.report(iMetric, iSys, Type.RESAMPLED_MAX, maxByMetric[iMetric]);
-			}
-		}
-	}
+      for (int iMetric = 0; iMetric < metrics.size(); iMetric++) {
+        results.report(iMetric, iSys, Type.RESAMPLED_MEAN_AVG, meanByMetric[iMetric]);
+        results.report(iMetric, iSys, Type.RESAMPLED_STDDEV_AVG,
+            stddevByMetric[iMetric]);
+        results.report(iMetric, iSys, Type.RESAMPLED_MIN, minByMetric[iMetric]);
+        results.report(iMetric, iSys, Type.RESAMPLED_MAX, maxByMetric[iMetric]);
+      }
+    }
+  }
 }
