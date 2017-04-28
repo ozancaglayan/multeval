@@ -1,3 +1,14 @@
+V0.5.2 - Apr 11, 2017
+* Removed constants file, use build.xml for versioning
+* Assume METEOR will be used by default
+* Add src/multeval.sh.template that will be copied into root folder
+  after building the project. You can copy this script inside a folder
+  in your $PATH to allow calling multeval from anywhere.
+* Removed all short flags for options which were actually broken.
+  Always use -- style flags.
+* Merged a documentation clarification regarding ter.punctuation flag.
+* Added --names to explicitly provide short descriptive names to the systems.
+
 V0.5.1 - Jan 24, 2012
 * N-best list module now normalizes extra space in hypotheses
 * Single optimizer runs no longer cause a NaN in the output table -- instead we print a warning message
