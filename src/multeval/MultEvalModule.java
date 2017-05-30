@@ -66,6 +66,10 @@ public class MultEvalModule implements Module {
   @Option(longName = "fullLatexDoc", usage = "Output a fully compilable Latex document instead of just the table alone", required = false, defaultValue = "false")
   private boolean fullLatexDoc;
 
+  // The default value results in a different output than initial code
+  @Option(longName = "metricsAsCols", usage = "Should metrics be presented in rows in latex table?", required = false, defaultValue = "true")
+  private boolean metricsAsCols;
+
   @Option(longName = "rankDir", usage = "Rank hypotheses of median optimization run of each system with regard to improvement/decline over median baseline system and output to the specified directory for analysis", required = false)
   private String rankDir;
 
@@ -176,7 +180,11 @@ public class MultEvalModule implements Module {
       File file = new File(latexOutFile);
       System.err.println("Writing Latex table to " + file.getAbsolutePath());
       PrintWriter out = new PrintWriter(file);
-      table.write(results, metrics, out, fullLatexDoc);
+      if(metricsAsCols) {
+          table.writeMetricsAsCols(results, metrics, out, fullLatexDoc);
+      } else {
+        table.write(results, metrics, out, fullLatexDoc);
+      }
       out.close();
     }
 
