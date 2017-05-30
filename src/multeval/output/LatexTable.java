@@ -82,6 +82,7 @@ public class LatexTable {
     }
 
     out.println("\\begin{table*}[htb]");
+    out.println("\\renewcommand\\arraystretch{1.35}");
     out.println("\\begin{center}");
     out.println("\\begin{footnotesize}");
 
