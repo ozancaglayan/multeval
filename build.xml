@@ -12,7 +12,7 @@
 	   includeantruntime="false"
 	   debug="off" encoding="utf8" />
   </target>
-  
+
   <!-- Delete the compiled files -->
   <target name="clean">
     <delete quiet="true">
@@ -21,7 +21,7 @@
       </fileset>
     </delete>
   </target>
-  
+
   <!-- Create a JAR file of the compiled classes -->
   <target name="jar" depends="compile">
     <jar destfile="multeval-${multeval_ver}.jar">
