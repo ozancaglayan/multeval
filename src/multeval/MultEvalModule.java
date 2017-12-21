@@ -82,7 +82,7 @@ public class MultEvalModule implements Module {
   @Option(longName = "threads", usage = "How many threads should we use? Thread-unsafe metrics will be run in a separate thread. (Zero means all available cores)", required = false, defaultValue = "0")
   private int threads;
 
-  @Option(longName = "names", usage = "Give short names for each --hyps-* system that will be used instead of sys/system <n>.", defaultValue = "no", arrayDelim = " ")
+  @Option(longName = "names", usage = "Give short names for each --hyps-* system that will be used instead of sys/system <n>.", defaultValue = "", arrayDelim = " ")
   public String[] sysShortNames;
 
   // TODO: Lowercasing option
@@ -130,7 +130,9 @@ public class MultEvalModule implements Module {
     }
 
     // Do we use short names or not?
-    boolean useShortNames = (sysShortNames.length == numSystems + 1);
+    boolean useShortNames = false;
+    if (! sysShortNames[0].isEmpty() && (sysShortNames.length == numSystems + 1))
+      useShortNames = true;
 
     // Final array to be filled
     String[] sysNames = new String[data.getNumSystems()];
