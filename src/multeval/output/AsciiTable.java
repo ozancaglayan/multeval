@@ -57,12 +57,8 @@ public class AsciiTable {
 
 	private void print(PrintStream out, String[] columns) {
 	  String sysName = columns[0];
-	  if (sysName.length() > 60) {
-	    sysName = sysName.substring(0, 30) + "..." +
-	              sysName.substring(sysName.length() - 30);
-    }
 
-		out.print(String.format("%-64s", sysName));
+		out.print(String.format("%-104s", sysName));
 		for(int i=1; i < columns.length; i++) {
 			out.print(String.format("%-23s", columns[i])); // 23 not 21 due to metric names
 		}
