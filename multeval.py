@@ -10,7 +10,6 @@ from pathlib import Path
 import tabulate
 
 
-MULTEVAL_BIN = Path('~/git/multeval/multeval').expanduser()
 
 def fancy_multeval(output, sort_by):
     def get_fields(line):
@@ -42,66 +41,53 @@ def fancy_multeval(output, sort_by):
             fields[0] = fields[0].split(':')[-1].strip()
             systems.append(fields)
 
-    # Sort systems wrt METEOR
+    # Sort systems wrt `sort_by`
     sort_by = sort_by.upper()
     systems = sorted(
         systems, key=lambda x: float(x[header.index(sort_by)].split()[0]))
     return tabulate.tabulate([baseline] + systems, header)
 
 
-def get_systems(test_set, baseline, folders=None,
-                metric='meteor', beam_size=12,
-                suffix=None, prefix='hyp.word', custom_fname=None):
+def get_systems(baseline, suffix, folders=None):
     hypfiles = []
-    systems = defaultdict(list)
+    systems = defaultdict(set)
     sys_dict = OrderedDict()
 
-    glob = '{}.{}.*.{}.beam{}'.format(prefix, metric, test_set, beam_size)
-    if suffix:
-        glob += '.{}'.format(suffix)
-
-    if custom_fname is not None:
-        glob = custom_fname
+    glob = f'*.{suffix}'
 
     if folders is None:
         root = Path('.')
         hypfiles = list(root.glob('*/{}'.format(glob)))
     else:
-        for folder in folders:
+        for folder in folders + [baseline]:
             hypfiles.extend(Path(folder).glob(glob))
 
     if len(hypfiles) == 0:
-        raise Exception('No hypothesis file found with glob "{}"'.format(glob))
+        raise Exception(f'No hypothesis file found with glob {glob!r}')
 
     # Fetch systems
     for hypfile in hypfiles:
         # Path -> list of hyp files
-        systems[str(hypfile.parent)].append(str(hypfile))
+        systems[str(hypfile.parent)].add(str(hypfile))
 
     n_runs = Counter(
         [len(files) for files in systems.values()]).most_common(1)[0][0]
-    print('Guessed n_runs: {}'.format(n_runs))
 
     for sysname in list(systems.keys()):
         if len(systems[sysname]) != n_runs:
-            print('Skipping system {} with different n_runs'.format(sysname))
+            print(f'Skipping system {sysname} with different n_runs')
             del systems[sysname]
         else:
-            print('Adding system {} with {} runs'.format(
-                sysname, len(systems[sysname])))
-
-    # Put baseline as first system
-    if baseline not in systems:
-        raise Exception('baseline {} does not exist'.format(baseline))
+            print(f'Adding system {sysname} with {len(systems[sysname])} runs')
 
     # Put baseline first
-    sys_dict[baseline] = systems.pop(baseline)
+    sys_dict[baseline] = sorted(list(systems.pop(baseline)))
 
     # Sort the rest alphabetically
     for system in sorted(systems.keys()):
-        sys_dict[system] = systems[system]
+        sys_dict[system] = sorted(list(systems[system]))
 
-    return sys_dict
+    return sys_dict, n_runs
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='multeval')
@@ -109,26 +95,17 @@ if __name__ == '__main__':
     parser.add_argument('-t', '--test-set', required=True, type=str,
                         help='test set suffix i.e. test_2017_flickr/mscoco')
 
-    parser.add_argument('-M', '--multeval-metrics', default='bleu,meteor,ter,length',
-                        help='Which multeval metrics to run.')
+    parser.add_argument('-m', '--metrics', default='bleu,meteor,ter',
+                        help='Which multeval metrics to run. (First one used as primary.)')
 
-    parser.add_argument('-l', '--language', default='de',
+    parser.add_argument('-l', '--language', type=str, default='',
                         help='Language code for METEOR.')
 
     parser.add_argument('-b', '--baseline', required=True, type=str,
                         help='folder name for baseline system.')
 
-    parser.add_argument('-s', '--suffix', type=str, default='',
-                        help='Suffix for hypothesis file i.e. .beam12.<suff>')
-
-    parser.add_argument('-p', '--prefix', type=str, default='hyp.word',
-                        help='Prefix for hypothesis files.')
-
-    parser.add_argument('-m', '--metric', default='meteor',
-                        help='best.<metric> suffix to search for.')
-
-    parser.add_argument('-c', '--custom-file', default=None,
-                        help='Overrides -s, -p, -m and searches for the given file name instead.')
+    parser.add_argument('-s', '--suffix', type=str, required=True,
+                        help='Suffix glob for hypothesis files')
 
     parser.add_argument('-o', '--output-folder', default='multeval_results',
                         help='Output folder.')
@@ -143,12 +120,20 @@ if __name__ == '__main__':
                         help='Approximate randomization shuffles.')
 
     parser.add_argument('folders', nargs='*',
-                        help='List of folders to consider for evaluation.')
+                        help='List of folders to consider for evaluation excluding baseline.')
 
     # Parse arguments
     args = parser.parse_args()
 
-    assert os.path.exists(args.ref), "Reference {} does not exist."
+    metrics = [m.lower() for m in args.metrics.split(',')]
+    main_metric = metrics[0]
+    if 'meteor' in metrics and not args.language:
+        print('--language is required for METEOR metric.')
+        sys.exit(1)
+
+    if not os.path.exists(args.ref):
+        print(f'reference {args.ref!r} does not exist.')
+        sys.exit(1)
 
     # Create output folder
     out = Path(args.output_folder) / args.test_set
@@ -158,45 +143,34 @@ if __name__ == '__main__':
 
     out.mkdir(parents=True, exist_ok=True)
 
-    multeval_metrics = args.multeval_metrics.split(',')
-    if args.metric not in multeval_metrics:
-        args.metric = multeval_metrics[0]
-
-    print('Multeval metrics: {}'.format(','.join(multeval_metrics)))
-    print('Hypothesis selection metric: {}'.format(args.metric))
-
-
     if len(args.folders) == 0:
         # Recursively walk through the current folder to find .log files
         args.folders = None
 
-    sysdict = get_systems(args.test_set, args.baseline, metric=args.metric,
-                          folders=args.folders, suffix=args.suffix,
-                          prefix=args.prefix, custom_fname=args.custom_file)
-    print('- Found {} different models (n_runs: {})'.format(
-        len(sysdict), len(list(sysdict.values())[0])))
+    sysdict, n_runs = get_systems(args.baseline, folders=args.folders, suffix=args.suffix)
+    print(f'- Found {len(sysdict)} different models (n_runs: {n_runs})')
 
     #########################################
     # Construct multeval arguments and run it
     #########################################
-    cmd = [str(MULTEVAL_BIN), "eval",
+    baseline_files = sysdict.pop(args.baseline)
+    cmd = ["multeval", "eval",
            '--refs', args.ref,
-           '--rankDir', '{}/ranksys'.format(out),
-           '--latex', '{}/results.tex'.format(out),
+           '--rankDir', f'{out}/ranksys',
+           '--latex', f'{out}/results.tex',
            '--names', args.baseline, *list(sysdict.keys()),
-           '--hyps-baseline', *sysdict[args.baseline],
+           '--hyps-baseline', *baseline_files,
            '--ar-shuffles', str(args.ar_shuffles),
-           '--metrics', *multeval_metrics]
+           '--metrics', *metrics]
 
-    if 'meteor' in multeval_metrics:
+    if 'meteor' in metrics:
         cmd.extend(["--meteor.language", args.language])
 
     for i, (sys_name, files) in enumerate(sysdict.items()):
-        cmd += ['--hyps-sys%d' % (i + 1), *files]
+        cmd += [f'--hyps-sys{i + 1}', *files]
 
-    print(' '.join(cmd))
     res = subprocess.check_output(cmd, universal_newlines=True)
-    fancy = fancy_multeval(res.strip(), args.metric)
+    fancy = fancy_multeval(res.strip(), main_metric)
     with open(out / 'results.txt', 'w') as f:
         f.write(fancy + '\n')
     print(fancy)
